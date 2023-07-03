@@ -1,0 +1,15 @@
+[package]
+name = "rssql"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+description = "Execute SQL statements in Rust and return results"
+homepage = "https://github.com/rikonaka/rssql"
+documentation = "https://docs.rs/rssql"
+repository = "https://github.com/rikonaka/rssql"
+readme = "README.md"
+keywords = ["SQL", "MySQL", "PostgreSQL"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
