@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![doc = include_str!("lib.md")]
 use std::collections::HashMap;
 use std::fmt;
 
