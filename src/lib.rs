@@ -32,9 +32,9 @@ impl fmt::Display for SQLDataTypes {
 
 #[derive(Debug)]
 pub struct SQLRets {
-    /// Column name vec sort by default
+    /// Column name vec sort by default.
     pub column: Vec<String>,
-    /// Returns
+    /// Returns.
     pub rets: Vec<HashMap<String, SQLDataTypes>>,
 }
 
@@ -53,6 +53,7 @@ impl SQLRets {
             self.column.push(column_name)
         }
     }
+    /// Get first data by column name.
     ///
     /// ```
     /// use rssql::MySQL;
@@ -82,6 +83,7 @@ impl SQLRets {
             None
         }
     }
+    /// Get all data by column name.
     pub fn get_all(&self, column_name: &str) -> Option<Vec<SQLDataTypes>> {
         if self.column.contains(&column_name.to_string()) {
             if self.rets.len() > 0 {
@@ -166,7 +168,7 @@ pub struct MySQL {
 }
 
 impl MySQL {
-    /// Connect to mysql (mariadb) database
+    /// Connect to mysql (mariadb) database.
     ///
     /// # Example
     /// ```
@@ -206,19 +208,19 @@ impl MySQL {
         let alive = true;
         Ok(MySQL { connection, alive })
     }
-    /// Execute the sql
+    /// Execute the sql.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => mysql::raw_mysql_query(&mut self.connection, sql).await,
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
-    /// Close the mysql (mariadb) connnection
+    /// Close the mysql (mariadb) connnection.
     pub async fn close(mut self) {
         self.alive = false;
         let _ = self.connection.close().await;
     }
-    /// Check if the connection is valid
+    /// Check if the connection is valid.
     pub async fn check_connection(&mut self) -> bool {
         match self.alive {
             true => match self.connection.ping().await {
@@ -236,7 +238,7 @@ pub struct PostgreSQL {
 }
 
 impl PostgreSQL {
-    /// Connect to postgresql database
+    /// Connect to postgresql database.
     ///
     /// ```
     /// use rssql::PostgreSQL;
@@ -265,19 +267,19 @@ impl PostgreSQL {
         let alive = true;
         Ok(PostgreSQL { connection, alive })
     }
-    /// Execute the sql
+    /// Execute the sql.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => postgresql::raw_psql_query(&mut self.connection, sql).await,
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
-    /// Close the postgresql connnection
+    /// Close the postgresql connnection.
     pub async fn close(mut self) {
         self.alive = false;
         let _ = self.connection.close().await;
     }
-    /// Check if the connection is valid
+    /// Check if the connection is valid.
     pub async fn check_connection(&mut self) -> bool {
         match self.alive {
             true => match self.connection.ping().await {
