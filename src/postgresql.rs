@@ -8,8 +8,8 @@ use sqlx::{Column, PgConnection, Row, TypeInfo};
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::{SqlDataType, JSON_DATA_MAX_SHOW};
-use crate::SqlRets;
+use crate::{SQLDataTypes, JSON_DATA_MAX_SHOW};
+use crate::SQLRets;
 use crate::UNKNOWN_DATA_TYPE;
 use crate::BINARY_DATA_TYPE;
 
@@ -19,7 +19,7 @@ static PGMONEY: &str = "[PGMONEY]";
 static PGTIMETZ: &str = "[PGTIMETZ]";
 
 #[derive(Debug, Clone)]
-pub enum PostgreSQLDataType {
+pub enum PostgreSQLDataTypes {
     /// From https://docs.rs/sqlx-postgres/0.7.0/sqlx_postgres/types/index.html
     Bool(bool),
     I8(i8),
@@ -58,43 +58,43 @@ pub enum PostgreSQLDataType {
     JsonValue(JsonValue),
 }
 
-impl fmt::Display for PostgreSQLDataType {
+impl fmt::Display for PostgreSQLDataTypes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            PostgreSQLDataType::Bool(v) => write!(f, "{}", v),
-            PostgreSQLDataType::I8(v) => write!(f, "{}", v),
-            PostgreSQLDataType::I16(v) => write!(f, "{}", v),
-            PostgreSQLDataType::I32(v) => write!(f, "{}", v),
-            PostgreSQLDataType::I64(v) => write!(f, "{}", v),
-            PostgreSQLDataType::U8(v) => write!(f, "{}", v),
-            PostgreSQLDataType::U16(v) => write!(f, "{}", v),
-            PostgreSQLDataType::U64(v) => write!(f, "{}", v),
-            PostgreSQLDataType::F32(v) => write!(f, "{}", v),
-            PostgreSQLDataType::F64(v) => write!(f, "{}", v),
-            PostgreSQLDataType::String(v) => write!(f, "{}", v),
-            PostgreSQLDataType::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
-            PostgreSQLDataType::Void(_) => write!(f, "()"),
-            PostgreSQLDataType::PgInterval(_) => write!(f, "{}", PGINTERVAL),
-            PostgreSQLDataType::PgRangeBigDecimal(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgRangeDateTime(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgRangeNaiveDate(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgRangeNaiveDateTime(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgRangeI32(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgRangeI64(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgMoney(_) => write!(f, "{}", PGMONEY),
-            PostgreSQLDataType::PgLTree(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgLQuery(v) => write!(f, "{}", v),
-            PostgreSQLDataType::BigDecimal(v) => write!(f, "{}", v),
-            PostgreSQLDataType::DateTime(v) => write!(f, "{}", v),
-            PostgreSQLDataType::NaiveDateTime(v) => write!(f, "{}", v),
-            PostgreSQLDataType::NaiveDate(v) => write!(f, "{}", v),
-            PostgreSQLDataType::NaiveTime(v) => write!(f, "{}", v),
-            PostgreSQLDataType::PgTimeTz(_) => write!(f, "{}", PGTIMETZ),
-            PostgreSQLDataType::Uuid(v) => write!(f, "{}", v),
-            PostgreSQLDataType::IpNetwork(v) => write!(f, "{}", v),
-            PostgreSQLDataType::MacAddress(v) => write!(f, "{}", v),
-            PostgreSQLDataType::BitVec(_) => write!(f, "{}", BINARY_DATA_TYPE),
-            PostgreSQLDataType::JsonValue(v) => {
+            PostgreSQLDataTypes::Bool(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::I8(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::I16(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::I32(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::I64(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::U8(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::U16(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::U64(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::F32(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::F64(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::String(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            PostgreSQLDataTypes::Void(_) => write!(f, "()"),
+            PostgreSQLDataTypes::PgInterval(_) => write!(f, "{}", PGINTERVAL),
+            PostgreSQLDataTypes::PgRangeBigDecimal(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgRangeDateTime(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgRangeNaiveDate(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgRangeNaiveDateTime(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgRangeI32(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgRangeI64(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgMoney(_) => write!(f, "{}", PGMONEY),
+            PostgreSQLDataTypes::PgLTree(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgLQuery(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::BigDecimal(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::DateTime(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::NaiveDateTime(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::NaiveDate(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::NaiveTime(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::PgTimeTz(_) => write!(f, "{}", PGTIMETZ),
+            PostgreSQLDataTypes::Uuid(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::IpNetwork(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::MacAddress(v) => write!(f, "{}", v),
+            PostgreSQLDataTypes::BitVec(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            PostgreSQLDataTypes::JsonValue(v) => {
                 let json_value = format!("{}", v);
                 write!(f, "{}", &json_value[0..JSON_DATA_MAX_SHOW])
             },
@@ -102,9 +102,9 @@ impl fmt::Display for PostgreSQLDataType {
     }
 }
 
-pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Result<SqlRets> {
+pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Result<SQLRets> {
     let rows = sqlx::query(sql).fetch_all(conn).await?;
-    let mut sql_rets = SqlRets::new();
+    let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {
         // push all column
@@ -118,7 +118,7 @@ pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Resul
     }
 
     for pg_row in &rows {
-        let mut sql_row: HashMap<String, SqlDataType> = HashMap::new();
+        let mut sql_row: HashMap<String, SQLDataTypes> = HashMap::new();
         let pg_row_len = pg_row.len();
         for i in 0..pg_row_len {
             let col = pg_row.column(i);
@@ -127,71 +127,71 @@ pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Resul
             let postgresql_value = match type_info.name() {
                 "BOOL" => {
                     let value: bool = pg_row.get(i);
-                    PostgreSQLDataType::Bool(value)
+                    PostgreSQLDataTypes::Bool(value)
                 }
                 "CHAR" => {
                     let value: i8 = pg_row.get(i);
-                    PostgreSQLDataType::I8(value)
+                    PostgreSQLDataTypes::I8(value)
                 }
                 "SMALLINT" | "SMALLSERIAL" | "INT2" => {
                     let value: i16 = pg_row.get(i);
-                    PostgreSQLDataType::I16(value)
+                    PostgreSQLDataTypes::I16(value)
                 }
                 "INT" | "SERIAL" | "INT4" => {
                     let value: i32 = pg_row.get(i);
-                    PostgreSQLDataType::I32(value)
+                    PostgreSQLDataTypes::I32(value)
                 }
                 "BIGINT" | "BIGSERIAL" | "INT8" => {
                     let value: i64 = pg_row.get(i);
-                    PostgreSQLDataType::I64(value)
+                    PostgreSQLDataTypes::I64(value)
                 }
                 "REAL" | "FLOAT4" => {
                     let value: f32 = pg_row.get(i);
-                    PostgreSQLDataType::F32(value)
+                    PostgreSQLDataTypes::F32(value)
                 }
                 "DOUBLE PRECISION" | "FLOAT8" => {
                     let value: f64 = pg_row.get(i);
-                    PostgreSQLDataType::F64(value)
+                    PostgreSQLDataTypes::F64(value)
                 }
                 "VARCHAR" | "CHAR(N)" | "TEXT" | "NAME" => {
                     let value: String = pg_row.get(i);
-                    PostgreSQLDataType::String(value)
+                    PostgreSQLDataTypes::String(value)
                 }
                 "BYTEA" => {
                     let value: Vec<u8> = pg_row.get(i);
-                    PostgreSQLDataType::Binary(value)
+                    PostgreSQLDataTypes::Binary(value)
                 }
                 "VOID" => {
                     let value = ();
-                    PostgreSQLDataType::Void(value)
+                    PostgreSQLDataTypes::Void(value)
                 }
                 "INTERVAL" => {
                     let value: PgInterval = pg_row.get(i);
-                    PostgreSQLDataType::PgInterval(value)
+                    PostgreSQLDataTypes::PgInterval(value)
                 }
                 "NUMRANGE" => {
                     let value: PgRange<BigDecimal> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeBigDecimal(value)
+                    PostgreSQLDataTypes::PgRangeBigDecimal(value)
                 }
                 "DATERANGE" => {
                     let value: PgRange<NaiveDate> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeNaiveDate(value)
+                    PostgreSQLDataTypes::PgRangeNaiveDate(value)
                 }
                 "TSTZRANGE" => {
                     let value: PgRange<DateTime<chrono::Utc>> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeDateTime(value)
+                    PostgreSQLDataTypes::PgRangeDateTime(value)
                 }
                 "TSRANGE" => {
                     let value: PgRange<NaiveDateTime> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeNaiveDateTime(value)
+                    PostgreSQLDataTypes::PgRangeNaiveDateTime(value)
                 }
                 "INT4RANGE" => {
                     let value: PgRange<i32> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeI32(value)
+                    PostgreSQLDataTypes::PgRangeI32(value)
                 }
                 "INT8RANGE" => {
                     let value: PgRange<i64> = pg_row.get(i);
-                    PostgreSQLDataType::PgRangeI64(value)
+                    PostgreSQLDataTypes::PgRangeI64(value)
                 }
                 // "INT8RANGE" | "INT4RANGE" | "TSRANGE" | "TSTZRANGE" | "DATERANGE" | "NUMRANGE" => {
                 //     let value: PgRange<i64> = pg_row.get(i);
@@ -199,65 +199,65 @@ pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Resul
                 // }
                 "MONEY" => {
                     let value: PgMoney = pg_row.get(i);
-                    PostgreSQLDataType::PgMoney(value)
+                    PostgreSQLDataTypes::PgMoney(value)
                 }
                 "LTREE" => {
                     let value: PgLTree = pg_row.get(i);
-                    PostgreSQLDataType::PgLTree(value)
+                    PostgreSQLDataTypes::PgLTree(value)
                 }
                 "LQUERY" => {
                     let value: PgLQuery = pg_row.get(i);
-                    PostgreSQLDataType::PgLQuery(value)
+                    PostgreSQLDataTypes::PgLQuery(value)
                 }
                 "NUMERIC" => {
                     let value: BigDecimal = pg_row.get(i);
-                    PostgreSQLDataType::BigDecimal(value)
+                    PostgreSQLDataTypes::BigDecimal(value)
                 }
                 "TIMESTAMPTZ" => {
                     let value: DateTime<chrono::Utc> = pg_row.get(i);
-                    PostgreSQLDataType::DateTime(value)
+                    PostgreSQLDataTypes::DateTime(value)
                 }
                 "TIMESTAMP" => {
                     let value: NaiveDateTime = pg_row.get(i);
-                    PostgreSQLDataType::NaiveDateTime(value)
+                    PostgreSQLDataTypes::NaiveDateTime(value)
                 }
                 "DATE" => {
                     let value: NaiveDate = pg_row.get(i);
-                    PostgreSQLDataType::NaiveDate(value)
+                    PostgreSQLDataTypes::NaiveDate(value)
                 }
                 "TIME" => {
                     let value: NaiveTime = pg_row.get(i);
-                    PostgreSQLDataType::NaiveTime(value)
+                    PostgreSQLDataTypes::NaiveTime(value)
                 }
                 "TIMETZ" => {
                     let value: PgTimeTz = pg_row.get(i);
-                    PostgreSQLDataType::PgTimeTz(value)
+                    PostgreSQLDataTypes::PgTimeTz(value)
                 }
                 "UUID" => {
                     let value: Uuid = pg_row.get(i);
-                    PostgreSQLDataType::Uuid(value)
+                    PostgreSQLDataTypes::Uuid(value)
                 }
                 "INET" | "CIDR" => {
                     let value: IpNetwork = pg_row.get(i);
-                    PostgreSQLDataType::IpNetwork(value)
+                    PostgreSQLDataTypes::IpNetwork(value)
                 }
                 "MACADDR" => {
                     let value: MacAddress = pg_row.get(i);
-                    PostgreSQLDataType::MacAddress(value)
+                    PostgreSQLDataTypes::MacAddress(value)
                 }
                 "BIT" | "VARBIT" => {
                     let value: BitVec = pg_row.get(i);
-                    PostgreSQLDataType::BitVec(value)
+                    PostgreSQLDataTypes::BitVec(value)
                 }
                 "JSON" | "JSONB" => {
                     let value: JsonValue = pg_row.get(i);
-                    PostgreSQLDataType::JsonValue(value)
+                    PostgreSQLDataTypes::JsonValue(value)
                 }
                 _ => {
-                    PostgreSQLDataType::String(UNKNOWN_DATA_TYPE.into())
+                    PostgreSQLDataTypes::String(UNKNOWN_DATA_TYPE.into())
                 }
             };
-            let sql_value = SqlDataType::PostgreSQLDataType(postgresql_value);
+            let sql_value = SQLDataTypes::PostgreSQLDataTypes(postgresql_value);
             sql_row.insert(col_name, sql_value);
         }
         sql_rets.push_rets(sql_row);

@@ -7,8 +7,8 @@ use sqlx::{Connection, MySqlConnection, PgConnection};
 mod mysql;
 mod postgresql;
 
-use mysql::MySQLDataType;
-use postgresql::PostgreSQLDataType;
+use mysql::MySQLDataTypes;
+use postgresql::PostgreSQLDataTypes;
 
 pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
 pub static BINARY_DATA_TYPE: &str = "[BINARY]";
@@ -16,35 +16,35 @@ pub static JSON_DATA_MAX_SHOW: usize = 8;
 pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 
 #[derive(Debug, Clone)]
-pub enum SqlDataType {
-    MySQLDataType(MySQLDataType),
-    PostgreSQLDataType(PostgreSQLDataType),
+pub enum SQLDataTypes {
+    MySQLDataTypes(MySQLDataTypes),
+    PostgreSQLDataTypes(PostgreSQLDataTypes),
 }
 
-impl fmt::Display for SqlDataType {
+impl fmt::Display for SQLDataTypes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SqlDataType::MySQLDataType(m) => write!(f, "{}", m),
-            SqlDataType::PostgreSQLDataType(p) => write!(f, "{}", p),
+            SQLDataTypes::MySQLDataTypes(m) => write!(f, "{}", m),
+            SQLDataTypes::PostgreSQLDataTypes(p) => write!(f, "{}", p),
         }
     }
 }
 
 #[derive(Debug)]
-pub struct SqlRets {
+pub struct SQLRets {
     /// Column name vec sort by default
     pub column: Vec<String>,
     /// Returns
-    pub rets: Vec<HashMap<String, SqlDataType>>,
+    pub rets: Vec<HashMap<String, SQLDataTypes>>,
 }
 
-impl SqlRets {
-    pub fn new() -> SqlRets {
+impl SQLRets {
+    pub fn new() -> SQLRets {
         let rets = Vec::new();
         let column = Vec::new();
-        SqlRets { column, rets }
+        SQLRets { column, rets }
     }
-    pub fn push_rets(&mut self, row: HashMap<String, SqlDataType>) {
+    pub fn push_rets(&mut self, row: HashMap<String, SQLDataTypes>) {
         self.rets.push(row);
     }
     pub fn push_column_name(&mut self, column_name: &str) {
@@ -71,7 +71,7 @@ impl SqlRets {
     ///     mysql.close().await;
     /// }
     /// ```
-    pub fn get_first_one(&self, column_name: &str) -> Option<SqlDataType> {
+    pub fn get_first_one(&self, column_name: &str) -> Option<SQLDataTypes> {
         if self.column.contains(&column_name.to_string()) {
             if self.rets.len() > 0 {
                 Some(self.rets[0].get(column_name).unwrap().clone())
@@ -82,7 +82,7 @@ impl SqlRets {
             None
         }
     }
-    pub fn get_all(&self, column_name: &str) -> Option<Vec<SqlDataType>> {
+    pub fn get_all(&self, column_name: &str) -> Option<Vec<SQLDataTypes>> {
         if self.column.contains(&column_name.to_string()) {
             if self.rets.len() > 0 {
                 let mut result = Vec::new();
@@ -99,7 +99,7 @@ impl SqlRets {
     }
 }
 
-impl fmt::Display for SqlRets {
+impl fmt::Display for SQLRets {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.rets.len() > 0 {
             let mut column_max_len = HashMap::new();
@@ -207,7 +207,7 @@ impl MySQL {
         Ok(MySQL { connection, alive })
     }
     /// Execute the sql
-    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SqlRets> {
+    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => mysql::raw_mysql_query(&mut self.connection, sql).await,
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
@@ -266,7 +266,7 @@ impl PostgreSQL {
         Ok(PostgreSQL { connection, alive })
     }
     /// Execute the sql
-    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SqlRets> {
+    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => postgresql::raw_psql_query(&mut self.connection, sql).await,
             false => panic!("{}", CLOSED_CONNECTION_ERROR),

@@ -5,14 +5,14 @@ use sqlx::{Column, MySqlConnection, Row, TypeInfo};
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::SqlDataType;
-use crate::SqlRets;
+use crate::SQLDataTypes;
+use crate::SQLRets;
 use crate::BINARY_DATA_TYPE;
 use crate::JSON_DATA_MAX_SHOW;
 use crate::UNKNOWN_DATA_TYPE;
 
 #[derive(Debug, Clone)]
-pub enum MySQLDataType {
+pub enum MySQLDataTypes {
     /// From https://docs.rs/sqlx-mysql/0.7.0/sqlx_mysql/types/index.html
     Bool(bool),
     I8(i8),
@@ -36,29 +36,29 @@ pub enum MySQLDataType {
     JsonValue(JsonValue),
 }
 
-impl fmt::Display for MySQLDataType {
+impl fmt::Display for MySQLDataTypes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            MySQLDataType::Bool(v) => write!(f, "{}", v),
-            MySQLDataType::I8(v) => write!(f, "{}", v),
-            MySQLDataType::I16(v) => write!(f, "{}", v),
-            MySQLDataType::I32(v) => write!(f, "{}", v),
-            MySQLDataType::I64(v) => write!(f, "{}", v),
-            MySQLDataType::U8(v) => write!(f, "{}", v),
-            MySQLDataType::U16(v) => write!(f, "{}", v),
-            MySQLDataType::U32(v) => write!(f, "{}", v),
-            MySQLDataType::U64(v) => write!(f, "{}", v),
-            MySQLDataType::F32(v) => write!(f, "{}", v),
-            MySQLDataType::F64(v) => write!(f, "{}", v),
-            MySQLDataType::String(v) => write!(f, "{}", v),
-            MySQLDataType::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
-            MySQLDataType::DateTime(v) => write!(f, "{}", v),
-            MySQLDataType::NaiveDateTime(v) => write!(f, "{}", v),
-            MySQLDataType::NaiveDate(v) => write!(f, "{}", v),
-            MySQLDataType::NaiveTime(v) => write!(f, "{}", v),
-            MySQLDataType::BigDecimal(v) => write!(f, "{}", v),
-            MySQLDataType::Uuid(v) => write!(f, "{}", v),
-            MySQLDataType::JsonValue(v) => {
+            MySQLDataTypes::Bool(v) => write!(f, "{}", v),
+            MySQLDataTypes::I8(v) => write!(f, "{}", v),
+            MySQLDataTypes::I16(v) => write!(f, "{}", v),
+            MySQLDataTypes::I32(v) => write!(f, "{}", v),
+            MySQLDataTypes::I64(v) => write!(f, "{}", v),
+            MySQLDataTypes::U8(v) => write!(f, "{}", v),
+            MySQLDataTypes::U16(v) => write!(f, "{}", v),
+            MySQLDataTypes::U32(v) => write!(f, "{}", v),
+            MySQLDataTypes::U64(v) => write!(f, "{}", v),
+            MySQLDataTypes::F32(v) => write!(f, "{}", v),
+            MySQLDataTypes::F64(v) => write!(f, "{}", v),
+            MySQLDataTypes::String(v) => write!(f, "{}", v),
+            MySQLDataTypes::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            MySQLDataTypes::DateTime(v) => write!(f, "{}", v),
+            MySQLDataTypes::NaiveDateTime(v) => write!(f, "{}", v),
+            MySQLDataTypes::NaiveDate(v) => write!(f, "{}", v),
+            MySQLDataTypes::NaiveTime(v) => write!(f, "{}", v),
+            MySQLDataTypes::BigDecimal(v) => write!(f, "{}", v),
+            MySQLDataTypes::Uuid(v) => write!(f, "{}", v),
+            MySQLDataTypes::JsonValue(v) => {
                 let json_str = format!("{}", v);
                 // let json_str = &json_str[0..JSON_DATA_MAX_SHOW];
                 write!(f, "{}", &json_str[0..JSON_DATA_MAX_SHOW])
@@ -67,9 +67,9 @@ impl fmt::Display for MySQLDataType {
     }
 }
 
-pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::Result<SqlRets> {
+pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::Result<SQLRets> {
     let rows = sqlx::query(sql).fetch_all(conn).await?;
-    let mut sql_rets = SqlRets::new();
+    let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {
         // push all column
@@ -83,7 +83,7 @@ pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::R
     }
 
     for mysql_row in &rows {
-        let mut sql_row: HashMap<String, SqlDataType> = HashMap::new();
+        let mut sql_row: HashMap<String, SQLDataTypes> = HashMap::new();
         let mysql_row_len = mysql_row.len();
 
         for i in 0..mysql_row_len {
@@ -93,87 +93,87 @@ pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::R
             let mysql_value = match type_info.name() {
                 "BOOLEAN" | "TINYINT(1)" => {
                     let value: bool = mysql_row.get(i);
-                    MySQLDataType::Bool(value)
+                    MySQLDataTypes::Bool(value)
                 }
                 "TINYINT" => {
                     let value: i8 = mysql_row.get(i);
-                    MySQLDataType::I8(value)
+                    MySQLDataTypes::I8(value)
                 }
                 "SMALLINT" => {
                     let value: i16 = mysql_row.get(i);
-                    MySQLDataType::I16(value)
+                    MySQLDataTypes::I16(value)
                 }
                 "INT" => {
                     let value: i32 = mysql_row.get(i);
-                    MySQLDataType::I32(value)
+                    MySQLDataTypes::I32(value)
                 }
                 "BIGINT" => {
                     let value: i64 = mysql_row.get(i);
-                    MySQLDataType::I64(value)
+                    MySQLDataTypes::I64(value)
                 }
                 "TINYINT UNSIGNED" => {
                     let value: u8 = mysql_row.get(i);
-                    MySQLDataType::U8(value)
+                    MySQLDataTypes::U8(value)
                 }
                 "SMALLINT UNSIGNED" => {
                     let value: u16 = mysql_row.get(i);
-                    MySQLDataType::U16(value)
+                    MySQLDataTypes::U16(value)
                 }
                 "INT UNSIGNED" => {
                     let value: u32 = mysql_row.get(i);
-                    MySQLDataType::U32(value)
+                    MySQLDataTypes::U32(value)
                 }
                 "BIGINT UNSIGNED" => {
                     let value: u64 = mysql_row.get(i);
-                    MySQLDataType::U64(value)
+                    MySQLDataTypes::U64(value)
                 }
                 "FLOAT" => {
                     let value: f32 = mysql_row.get(i);
-                    MySQLDataType::F32(value)
+                    MySQLDataTypes::F32(value)
                 }
                 "DOUBLE" => {
                     let value: f64 = mysql_row.get(i);
-                    MySQLDataType::F64(value)
+                    MySQLDataTypes::F64(value)
                 }
                 "VARCHAR" | "CHAR" | "TEXT" => {
                     let value: String = mysql_row.get(i);
-                    MySQLDataType::String(value)
+                    MySQLDataTypes::String(value)
                 }
                 "VARBINARY" | "BINARY" | "BLOB" => {
                     let value: Vec<u8> = mysql_row.get(i);
-                    MySQLDataType::Binary(value)
+                    MySQLDataTypes::Binary(value)
                 }
                 "TIMESTAMP" => {
                     let value: DateTime<chrono::Utc> = mysql_row.get(i);
-                    MySQLDataType::DateTime(value)
+                    MySQLDataTypes::DateTime(value)
                 }
                 "DATETIME" => {
                     let value: NaiveDateTime = mysql_row.get(i);
-                    MySQLDataType::NaiveDateTime(value)
+                    MySQLDataTypes::NaiveDateTime(value)
                 }
                 "DATE" => {
                     let value: NaiveDate = mysql_row.get(i);
-                    MySQLDataType::NaiveDate(value)
+                    MySQLDataTypes::NaiveDate(value)
                 }
                 "TIME" => {
                     let value: NaiveTime = mysql_row.get(i);
-                    MySQLDataType::NaiveTime(value)
+                    MySQLDataTypes::NaiveTime(value)
                 }
                 "DECIMAL" => {
                     let value: BigDecimal = mysql_row.get(i);
-                    MySQLDataType::BigDecimal(value)
+                    MySQLDataTypes::BigDecimal(value)
                 }
                 "BYTE(16)" => {
                     let value: Uuid = mysql_row.get(i);
-                    MySQLDataType::Uuid(value)
+                    MySQLDataTypes::Uuid(value)
                 }
                 "JSON" => {
                     let value: JsonValue = mysql_row.get(i);
-                    MySQLDataType::JsonValue(value)
+                    MySQLDataTypes::JsonValue(value)
                 }
-                _ => MySQLDataType::String(UNKNOWN_DATA_TYPE.into()),
+                _ => MySQLDataTypes::String(UNKNOWN_DATA_TYPE.into()),
             };
-            let sql_value = SqlDataType::MySQLDataType(mysql_value);
+            let sql_value = SQLDataTypes::MySQLDataTypes(mysql_value);
             sql_row.insert(col_name, sql_value);
         }
         sql_rets.push_rets(sql_row);
