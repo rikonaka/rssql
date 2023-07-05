@@ -7,7 +7,7 @@ use std::fmt;
 
 use crate::SQLDataTypes;
 use crate::SQLRets;
-use crate::BINARY_DATA_TYPE;
+use crate::BINARY;
 use crate::UNKNOWN_DATA_TYPE;
 
 #[derive(Debug, Clone)]
@@ -50,7 +50,7 @@ impl fmt::Display for MySQLDataTypes {
             MySQLDataTypes::F32(v) => write!(f, "{}", v),
             MySQLDataTypes::F64(v) => write!(f, "{}", v),
             MySQLDataTypes::String(v) => write!(f, "{}", v),
-            MySQLDataTypes::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            MySQLDataTypes::Binary(_) => write!(f, "{}", BINARY),
             MySQLDataTypes::DateTime(v) => write!(f, "{}", v),
             MySQLDataTypes::NaiveDateTime(v) => write!(f, "{}", v),
             MySQLDataTypes::NaiveDate(v) => write!(f, "{}", v),

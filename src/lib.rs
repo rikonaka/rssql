@@ -11,7 +11,7 @@ use mysql::MySQLDataTypes;
 use postgresql::PostgreSQLDataTypes;
 
 pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
-pub static BINARY_DATA_TYPE: &str = "[BINARY]";
+pub static BINARY: &str = "[BINARY]";
 pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 
 #[derive(Debug, Clone)]

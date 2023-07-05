@@ -11,7 +11,7 @@ use std::fmt;
 use crate::SQLDataTypes;
 use crate::SQLRets;
 use crate::UNKNOWN_DATA_TYPE;
-use crate::BINARY_DATA_TYPE;
+use crate::BINARY;
 
 
 static PGINTERVAL: &str = "[PGINTERVAL]";
@@ -72,7 +72,7 @@ impl fmt::Display for PostgreSQLDataTypes {
             PostgreSQLDataTypes::F32(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::F64(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::String(v) => write!(f, "{}", v),
-            PostgreSQLDataTypes::Binary(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            PostgreSQLDataTypes::Binary(_) => write!(f, "{}", BINARY),
             PostgreSQLDataTypes::Void(_) => write!(f, "()"),
             PostgreSQLDataTypes::PgInterval(_) => write!(f, "{}", PGINTERVAL),
             PostgreSQLDataTypes::PgRangeBigDecimal(v) => write!(f, "{}", v),
@@ -93,7 +93,7 @@ impl fmt::Display for PostgreSQLDataTypes {
             PostgreSQLDataTypes::Uuid(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::IpNetwork(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::MacAddress(v) => write!(f, "{}", v),
-            PostgreSQLDataTypes::BitVec(_) => write!(f, "{}", BINARY_DATA_TYPE),
+            PostgreSQLDataTypes::BitVec(_) => write!(f, "{}", BINARY),
             PostgreSQLDataTypes::JsonValue(v) => write!(f, "{}", v),
         }
     }
