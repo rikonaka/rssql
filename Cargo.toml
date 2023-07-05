@@ -1,9 +1,9 @@
 [package]
 name = "rssql"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "GPL-3.0-only"
-description = "Execute SQL statements in Rust and return results"
+description = "Struct free Rust SQL tool."
 homepage = "https://github.com/rikonaka/rssql"
 documentation = "https://docs.rs/rssql"
 repository = "https://github.com/rikonaka/rssql"

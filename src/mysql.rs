@@ -11,7 +11,7 @@ use crate::BINARY_DATA_TYPE;
 use crate::JSON_DATA_MAX_SHOW;
 use crate::UNKNOWN_DATA_TYPE;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MySQLDataType {
     /// From https://docs.rs/sqlx-mysql/0.7.0/sqlx_mysql/types/index.html
     Bool(bool),
@@ -71,13 +71,24 @@ pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::R
     let rows = sqlx::query(sql).fetch_all(conn).await?;
     let mut sql_rets = SqlRets::new();
 
-    for mysql_row in &rows {
-        let mut sql_row: HashMap<String, SqlDataType> = HashMap::new();
+    if rows.len() > 0 {
+        // push all column
+        let mysql_row = &rows[0];
         let mysql_row_len = mysql_row.len();
         for i in 0..mysql_row_len {
             let col = mysql_row.column(i);
             let col_name = col.name().to_string();
             sql_rets.push_column_name(&col_name);
+        }
+    }
+
+    for mysql_row in &rows {
+        let mut sql_row: HashMap<String, SqlDataType> = HashMap::new();
+        let mysql_row_len = mysql_row.len();
+
+        for i in 0..mysql_row_len {
+            let col = mysql_row.column(i);
+            let col_name = col.name().to_string();
             let type_info = col.type_info();
             let mysql_value = match type_info.name() {
                 "BOOLEAN" | "TINYINT(1)" => {

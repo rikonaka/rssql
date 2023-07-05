@@ -18,7 +18,7 @@ static PGINTERVAL: &str = "[PGINTERVAL]";
 static PGMONEY: &str = "[PGMONEY]";
 static PGTIMETZ: &str = "[PGTIMETZ]";
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum PostgreSQLDataType {
     /// From https://docs.rs/sqlx-postgres/0.7.0/sqlx_postgres/types/index.html
     Bool(bool),
@@ -106,13 +106,23 @@ pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Resul
     let rows = sqlx::query(sql).fetch_all(conn).await?;
     let mut sql_rets = SqlRets::new();
 
+    if rows.len() > 0 {
+        // push all column
+        let pg_row = &rows[0];
+        let mysql_row_len = pg_row.len();
+        for i in 0..mysql_row_len {
+            let col = pg_row.column(i);
+            let col_name = col.name().to_string();
+            sql_rets.push_column_name(&col_name);
+        }
+    }
+
     for pg_row in &rows {
         let mut sql_row: HashMap<String, SqlDataType> = HashMap::new();
         let pg_row_len = pg_row.len();
         for i in 0..pg_row_len {
             let col = pg_row.column(i);
             let col_name = col.name().to_string();
-            sql_rets.push_column_name(&col_name);
             let type_info = col.type_info();
             let postgresql_value = match type_info.name() {
                 "BOOL" => {
