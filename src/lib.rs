@@ -166,7 +166,7 @@ pub struct MySQL {
 }
 
 impl MySQL {
-    /// Connect to mysql(mariadb) database
+    /// Connect to mysql (mariadb) database
     ///
     /// # Example
     /// ```
@@ -213,7 +213,7 @@ impl MySQL {
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
-    /// Close the mysql(mariadb) connnection
+    /// Close the mysql (mariadb) connnection
     pub async fn close(mut self) {
         self.alive = false;
         let _ = self.connection.close().await;

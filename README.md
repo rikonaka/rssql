@@ -1,6 +1,10 @@
 # rssql
 
-Struct free Rust SQL tool.
+Struct-free Rust SQL tool.
+
+## Intro
+
+[`sqlx`](https://github.com/launchbadge/sqlx) based sql tools, support `mysql (mariadb)` and `postgresql`.
 
 ## Example
 
