@@ -223,8 +223,14 @@ impl MySQL {
     pub async fn check_connection(&mut self) -> bool {
         match self.alive {
             true => match self.connection.ping().await {
-                Ok(_) => true,
-                Err(_) => false,
+                Ok(_) => {
+                    self.alive = true;
+                    true
+                },
+                Err(_) => {
+                    self.alive = false;
+                    false
+                },
             },
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -282,8 +288,14 @@ impl PostgreSQL {
     pub async fn check_connection(&mut self) -> bool {
         match self.alive {
             true => match self.connection.ping().await {
-                Ok(_) => true,
-                Err(_) => false,
+                Ok(_) => {
+                    self.alive = true;
+                    true
+                },
+                Err(_) => {
+                    self.alive = false;
+                    false
+                },
             },
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
