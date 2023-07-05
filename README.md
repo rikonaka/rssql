@@ -68,6 +68,7 @@ async fn test_postgresql_one() {
     for r in rets.get_all("id").unwrap() {
         println!("{}", r);
     }
+    // Close the connection
     postgresql.close().await;
 }
 ```
