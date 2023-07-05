@@ -8,7 +8,6 @@ use std::fmt;
 use crate::SQLDataTypes;
 use crate::SQLRets;
 use crate::BINARY_DATA_TYPE;
-use crate::JSON_DATA_MAX_SHOW;
 use crate::UNKNOWN_DATA_TYPE;
 
 #[derive(Debug, Clone)]
@@ -58,11 +57,7 @@ impl fmt::Display for MySQLDataTypes {
             MySQLDataTypes::NaiveTime(v) => write!(f, "{}", v),
             MySQLDataTypes::BigDecimal(v) => write!(f, "{}", v),
             MySQLDataTypes::Uuid(v) => write!(f, "{}", v),
-            MySQLDataTypes::JsonValue(v) => {
-                let json_str = format!("{}", v);
-                // let json_str = &json_str[0..JSON_DATA_MAX_SHOW];
-                write!(f, "{}", &json_str[0..JSON_DATA_MAX_SHOW])
-            }
+            MySQLDataTypes::JsonValue(v) => write!(f, "{}", v),
         }
     }
 }

@@ -12,7 +12,6 @@ use postgresql::PostgreSQLDataTypes;
 
 pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
 pub static BINARY_DATA_TYPE: &str = "[BINARY]";
-pub static JSON_DATA_MAX_SHOW: usize = 8;
 pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 
 #[derive(Debug, Clone)]

@@ -8,7 +8,7 @@ use sqlx::{Column, PgConnection, Row, TypeInfo};
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::{SQLDataTypes, JSON_DATA_MAX_SHOW};
+use crate::SQLDataTypes;
 use crate::SQLRets;
 use crate::UNKNOWN_DATA_TYPE;
 use crate::BINARY_DATA_TYPE;
@@ -94,10 +94,7 @@ impl fmt::Display for PostgreSQLDataTypes {
             PostgreSQLDataTypes::IpNetwork(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::MacAddress(v) => write!(f, "{}", v),
             PostgreSQLDataTypes::BitVec(_) => write!(f, "{}", BINARY_DATA_TYPE),
-            PostgreSQLDataTypes::JsonValue(v) => {
-                let json_value = format!("{}", v);
-                write!(f, "{}", &json_value[0..JSON_DATA_MAX_SHOW])
-            },
+            PostgreSQLDataTypes::JsonValue(v) => write!(f, "{}", v),
         }
     }
 }
