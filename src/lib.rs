@@ -1,14 +1,257 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use std::collections::HashMap;
+use std::fmt;
+
+use anyhow;
+use sqlx::{Connection, MySqlConnection, PgConnection};
+
+mod mysql;
+mod postgresql;
+
+use mysql::MySQLDataType;
+use postgresql::PostgreSQLDataType;
+
+pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
+pub static BINARY_DATA_TYPE: &str = "[BINARY]";
+pub static JSON_DATA_MAX_SHOW: usize = 8;
+pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
+
+#[derive(Debug)]
+pub enum SqlDataType {
+    MySQLDataType(MySQLDataType),
+    PostgreSQLDataType(PostgreSQLDataType),
+}
+
+impl fmt::Display for SqlDataType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SqlDataType::MySQLDataType(m) => write!(f, "{}", m),
+            SqlDataType::PostgreSQLDataType(p) => write!(f, "{}", p),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct SqlRets {
+    /// Column name vec sort by default
+    pub column: Vec<String>,
+    /// Returns
+    pub rets: Vec<HashMap<String, SqlDataType>>,
+}
+
+impl SqlRets {
+    pub fn new() -> SqlRets {
+        let rets = Vec::new();
+        let column = Vec::new();
+        SqlRets { column, rets }
+    }
+    pub fn push_rets(&mut self, row: HashMap<String, SqlDataType>) {
+        self.rets.push(row);
+    }
+    pub fn push_column_name(&mut self, column_name: &str) {
+        let column_name = column_name.to_string();
+        if !self.column.contains(&column_name) {
+            self.column.push(column_name)
+        }
+    }
+}
+
+impl fmt::Display for SqlRets {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut column_max_len = HashMap::new();
+        for name in &self.column {
+            column_max_len.insert(name.to_string(), name.len() + 2);
+        }
+        for ret in &self.rets {
+            for name in &self.column {
+                let value = ret.get(name).unwrap();
+                let value_str = format!("{}", value);
+                if value_str.len() + 2 > *column_max_len.get(name).unwrap() {
+                    column_max_len.insert(name.to_string(), value_str.len() + 2);
+                }
+            }
+        }
+
+        let mut col_string = String::from("|");
+        let mut hline_string = String::from("+");
+        for name in &self.column {
+            let need_pad_len = (column_max_len.get(name).unwrap() - name.len()) as i32;
+            let mut col_name = name.to_string();
+            for i in 0..need_pad_len {
+                if i % 2 == 0 {
+                    col_name = format!("{} ", col_name);
+                } else {
+                    col_name = format!(" {}", col_name);
+                }
+            }
+            col_string = format!("{}{}|", col_string, col_name);
+            let mut hline = String::new();
+            for _ in 0..col_name.len() {
+                hline = format!("{}-", hline);
+            }
+            hline_string = format!("{}{}+", hline_string, hline);
+        }
+        let mut print_str = format!("{}\n{}\n{}", hline_string, col_string, hline_string);
+        for ret in &self.rets {
+            let mut col_string = String::from("|");
+            for name in &self.column {
+                let value = ret.get(name).unwrap();
+                let mut value_str = format!("{}", value);
+                let need_pad_len = (column_max_len.get(name).unwrap() - value_str.len()) as i32;
+                for i in 0..need_pad_len {
+                    if i % 2 == 0 {
+                        value_str = format!("{} ", value_str);
+                    } else {
+                        value_str = format!(" {}", value_str);
+                    }
+                }
+                col_string = format!("{}{}|", col_string, value_str);
+            }
+            print_str = format!("{}\n{}", print_str, col_string);
+        }
+        write!(f, "{}\n{}", print_str, hline_string)
+    }
+}
+
+pub struct MySql {
+    alive: bool,
+    connection: MySqlConnection,
+}
+
+impl MySql {
+    /// Connect to mysql(mariadb) database
+    /// 
+    /// # Example
+    /// ```
+    /// use rssql::MySql;
+    /// async fn test_mysql() {
+    ///     let url = "mysql://user:password@docker:13306/test";
+    ///     let mut mysql = MySql::connect(url).await.unwrap();
+    ///     let rets = mysql.execute("SELECT * FROM info").await.unwrap();
+    ///     println!("{}", rets);
+    ///     let check = mysql.check_connection().await;
+    ///     println!("{}", check);
+    ///     let _ = mysql.close().await;
+    /// }
+    /// ```
+    /// # Output
+    /// ```bash
+    /// true
+    /// +----+-------+---------------------+------------+
+    /// | id | name  |      datetime       |    date    |
+    /// +----+-------+---------------------+------------+
+    /// | 1  | test1 | 2023-03-20 00:00:00 | 2001-10-22 |
+    /// | 2  | test2 | 2023-03-20 00:00:00 | 2001-10-22 |
+    /// +----+-------+---------------------+------------+
+    /// ```
+    pub async fn connect(url: &str) -> anyhow::Result<MySql> {
+        let connection = MySqlConnection::connect(url).await?;
+        let alive = true;
+        Ok(MySql { connection, alive })
+    }
+    /// Execute the sql
+    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SqlRets> {
+        match self.alive {
+            true => mysql::raw_mysql_query(&mut self.connection, sql).await,
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Close the mysql(mariadb) connnection
+    pub async fn close(mut self) {
+        self.alive = false;
+        let _ = self.connection.close().await;
+    }
+    /// Check if the connection is valid
+    pub async fn check_connection(&mut self) -> bool {
+        match self.alive {
+            true => match self.connection.ping().await {
+                Ok(_) => true,
+                Err(_) => false,
+            },
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+}
+
+pub struct PostgreSql {
+    alive: bool,
+    connection: PgConnection,
+}
+
+impl PostgreSql {
+    /// Connect to postgresql database
+    /// 
+    /// ```
+    /// use rssql::PostgreSql;
+    /// async fn test_postgresql() {
+    ///     let url = "postgre://user:password@docker:15432/test";
+    ///     let mut postgresql = PostgreSql::connect(url).await.unwrap();
+    ///     let check = postgresql.check_connection().await;
+    ///     println!("{}", check);
+    ///     let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+    ///     println!("{}", rets);
+    ///     let _ = postgresql.close().await;
+    /// }
+    /// ```
+    /// # Output
+    /// ```bash
+    /// true
+    /// +----+-------+------------+
+    /// | id | name  |    date    |
+    /// +----+-------+------------+
+    /// | 1  | test2 | 2023-06-11 |
+    /// | 2  | test1 | 2023-06-11 |
+    /// +----+-------+------------+
+    /// ```
+    pub async fn connect(url: &str) -> anyhow::Result<PostgreSql> {
+        let connection = PgConnection::connect(url).await?;
+        let alive = true;
+        Ok(PostgreSql { connection, alive })
+    }
+    /// Execute the sql
+    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SqlRets> {
+        match self.alive {
+            true => postgresql::raw_psql_query(&mut self.connection, sql).await,
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Close the postgresql connnection
+    pub async fn close(mut self) {
+        self.alive = false;
+        let _ = self.connection.close().await;
+    }
+    /// Check if the connection is valid
+    pub async fn check_connection(&mut self) -> bool {
+        match self.alive {
+            true => match self.connection.ping().await {
+                Ok(_) => true,
+                Err(_) => false,
+            },
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    #[tokio::test]
+    async fn test_mysql() {
+        let url = "mysql://user:password@docker:13306/test";
+        let mut mysql = MySql::connect(url).await.unwrap();
+        let check = mysql.check_connection().await;
+        println!("{}", check);
+        let rets = mysql.execute("SELECT * FROM info").await.unwrap();
+        println!("{}", rets);
+        let _ = mysql.close().await;
+    }
+    #[tokio::test]
+    async fn test_postgresql() {
+        let url = "postgre://user:password@docker:15432/test";
+        let mut postgresql = PostgreSql::connect(url).await.unwrap();
+        let check = postgresql.check_connection().await;
+        println!("{}", check);
+        let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+        println!("{}", rets);
+        let _ = postgresql.close().await;
     }
 }
