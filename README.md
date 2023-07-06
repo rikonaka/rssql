@@ -22,6 +22,8 @@ async fn test_postgresql() {
     println!("{}", check);
     // Select all from table `info`
     let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+    // let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
+    // let rets = postgresql.execute_fetch_one("SELECT * FROM info").await.unwrap();
     println!("{}", rets);
     // Insert one row data into table `info`
     let rets = postgresql.execute("INSERT INTO info (name, date) VALUES ('test3', '2022-01-01')").await.unwrap();
