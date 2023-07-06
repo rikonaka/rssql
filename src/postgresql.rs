@@ -4,7 +4,8 @@ use sqlx::types::chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use sqlx::types::ipnetwork::IpNetwork;
 use sqlx::types::mac_address::MacAddress;
 use sqlx::types::{BigDecimal, BitVec, JsonValue, Uuid};
-use sqlx::{Column, PgConnection, Row, TypeInfo};
+use sqlx::{Column, Row, TypeInfo};
+use sqlx::postgres::PgRow;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -99,8 +100,7 @@ impl fmt::Display for PostgreSQLDataTypes {
     }
 }
 
-pub async fn raw_psql_query(conn: &mut PgConnection, sql: &str) -> anyhow::Result<SQLRets> {
-    let rows = sqlx::query(sql).fetch_all(conn).await?;
+pub async fn raw_process(rows: Vec<PgRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {

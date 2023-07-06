@@ -1,7 +1,8 @@
 use anyhow;
 use sqlx::types::chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
 use sqlx::types::{BigDecimal, JsonValue, Uuid};
-use sqlx::{Column, MySqlConnection, Row, TypeInfo};
+use sqlx::{Column, Row, TypeInfo};
+use sqlx::mysql::MySqlRow;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -62,8 +63,7 @@ impl fmt::Display for MySQLDataTypes {
     }
 }
 
-pub async fn raw_mysql_query(conn: &mut MySqlConnection, sql: &str) -> anyhow::Result<SQLRets> {
-    let rows = sqlx::query(sql).fetch_all(conn).await?;
+pub async fn raw_process(rows: Vec<MySqlRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {

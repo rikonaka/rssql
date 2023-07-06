@@ -6,13 +6,13 @@ use std::fmt;
 use anyhow;
 use sqlx::{Connection, MySqlConnection, PgConnection, SqliteConnection};
 
-mod sqlite;
 mod mysql;
 mod postgresql;
+mod sqlite;
 
-use sqlite::SQLiteDataTypes;
 use mysql::MySQLDataTypes;
 use postgresql::PostgreSQLDataTypes;
+use sqlite::SQLiteDataTypes;
 
 pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
 pub static BINARY: &str = "[BINARY]";
@@ -22,7 +22,7 @@ pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 pub enum SQLDataTypes {
     MySQLDataTypes(MySQLDataTypes),
     PostgreSQLDataTypes(PostgreSQLDataTypes),
-    SQLiteDataTypes(SQLiteDataTypes)
+    SQLiteDataTypes(SQLiteDataTypes),
 }
 
 impl fmt::Display for SQLDataTypes {
@@ -174,7 +174,7 @@ pub struct SQLite {
 
 impl SQLite {
     /// Connect to sqlite database.
-    /// 
+    ///
     /// # Example
     /// ```
     /// use rssql::SQLite;
@@ -200,10 +200,28 @@ impl SQLite {
         let alive = true;
         Ok(SQLite { connection, alive })
     }
-    /// Execute the sql.
+    /// Execute the sql and fetch all.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        Self::execute_fetch_all(self, sql).await
+    }
+    /// Same as execute.
+    pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
-            true => sqlite::raw_sqlite_query(&mut self.connection, sql).await,
+            true => {
+                let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
+                sqlite::raw_process(rows).await
+            }
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Execute and fetch one.
+    pub async fn execute_fetch_one(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        match self.alive {
+            true => {
+                let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
+                let rows = vec![row];
+                sqlite::raw_process(rows).await
+            }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
@@ -219,11 +237,11 @@ impl SQLite {
                 Ok(_) => {
                     self.alive = true;
                     true
-                },
+                }
                 Err(_) => {
                     self.alive = false;
                     false
-                },
+                }
             },
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -276,10 +294,28 @@ impl MySQL {
         let alive = true;
         Ok(MySQL { connection, alive })
     }
-    /// Execute the sql.
+    /// Execute the sql and fetch all.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        Self::execute_fetch_all(self, sql).await
+    }
+    /// Same as execute.
+    pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
-            true => mysql::raw_mysql_query(&mut self.connection, sql).await,
+            true => {
+                let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
+                mysql::raw_process(rows).await
+            }
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Execute and fetch one.
+    pub async fn execute_fetch_one(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        match self.alive {
+            true => {
+                let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
+                let rows = vec![row];
+                mysql::raw_process(rows).await
+            }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
@@ -295,11 +331,11 @@ impl MySQL {
                 Ok(_) => {
                     self.alive = true;
                     true
-                },
+                }
                 Err(_) => {
                     self.alive = false;
                     false
-                },
+                }
             },
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -341,10 +377,28 @@ impl PostgreSQL {
         let alive = true;
         Ok(PostgreSQL { connection, alive })
     }
-    /// Execute the sql.
+    /// Execute the sql and fetch all.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        Self::execute_fetch_all(self, sql).await
+    }
+    /// Same as execute.
+    pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
-            true => postgresql::raw_psql_query(&mut self.connection, sql).await,
+            true => {
+                let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
+                postgresql::raw_process(rows).await
+            }
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Execute and fetch one.
+    pub async fn execute_fetch_one(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        match self.alive {
+            true => {
+                let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
+                let rows = vec![row];
+                postgresql::raw_process(rows).await
+            }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
@@ -360,11 +414,11 @@ impl PostgreSQL {
                 Ok(_) => {
                     self.alive = true;
                     true
-                },
+                }
                 Err(_) => {
                     self.alive = false;
                     false
-                },
+                }
             },
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }

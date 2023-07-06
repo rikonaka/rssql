@@ -1,6 +1,7 @@
 use anyhow;
 use sqlx::types::chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime};
-use sqlx::{Column, SqliteConnection, Row, TypeInfo};
+use sqlx::{Column, Row, TypeInfo};
+use sqlx::sqlite::SqliteRow;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -41,8 +42,7 @@ impl fmt::Display for SQLiteDataTypes {
     }
 }
 
-pub async fn raw_sqlite_query(conn: &mut SqliteConnection, sql: &str) -> anyhow::Result<SQLRets> {
-    let rows = sqlx::query(sql).fetch_all(conn).await?;
+pub async fn raw_process(rows: Vec<SqliteRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {
