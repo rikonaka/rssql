@@ -8,7 +8,7 @@ homepage = "https://github.com/rikonaka/rssql"
 documentation = "https://docs.rs/rssql"
 repository = "https://github.com/rikonaka/rssql"
 readme = "README.md"
-keywords = ["SQL", "MySQL", "PostgreSQL"]
+keywords = ["SQL", "MySQL", "PostgreSQL", "SQLite"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
