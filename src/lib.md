@@ -18,6 +18,7 @@ async fn test_postgresql() {
 
 **Output**
 ```
+true
 +----+-------+------------+
 | id | name  |    date    |
 +----+-------+------------+
