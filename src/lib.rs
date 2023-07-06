@@ -376,7 +376,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn test_sqlite() {
-        let url = "sqlite:sqlite_test_1.db?mode=rwc";
+        let url = "sqlite:test.db?mode=rwc";
         let mut sqlite = SQLite::connect(url).await.unwrap();
         let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
         let _ = sqlite.execute(sql).await.unwrap();
@@ -388,7 +388,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql() {
-        let url = "mysql://root:password@127.0.0.1:13306/test";
+        let url = "mysql://root:password@127.0.0.1:3306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
@@ -408,7 +408,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_postgresql() {
-        let url = "postgre://user:password@127.0.0.1:15432/test";
+        let url = "postgre://user:password@127.0.0.1:5432/test";
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);

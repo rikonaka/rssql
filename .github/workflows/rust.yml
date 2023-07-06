@@ -27,24 +27,24 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 15432:5432
+          - 5432:5432
       mariadb:
         image: mariadb
         env:
           MARIADB_ROOT_PASSWORD: password
         ports:
-          - 13306:3306
+          - 3306:3306
 
     steps:
     - uses: actions/checkout@v3
     - name: Init database
-      run: mysql -h127.0.0.1 -P13306 -uroot -ppassword -e "CREATE database test;"
+      run: mysql -h127.0.0.1 -P3306 -uroot -ppassword -e "CREATE database test;"
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
       env:
         POSTGRES_HOST: postgres
-        POSTGRES_PORT: 15432
+        POSTGRES_PORT: 5432
         MARIADB_HOST: mariadb
-        MARIADB_PORT: 13306
+        MARIADB_PORT: 3306
