@@ -179,7 +179,7 @@ impl SQLite {
     /// ```
     /// use rssql::SQLite;
     /// async fn test_sqlite() {
-    ///     let url = "sqlite:data.db";
+    ///     let url = "sqlite:sqlite_test.db";
     ///     let mut sqlite = SQLite::connect(url).await.unwrap();
     ///     let sql = "SELECT * FROM info";
     ///     let rets = sqlite.execute(sql).await.unwrap();
@@ -376,7 +376,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn test_sqlite() {
-        let url = "sqlite:data.db";
+        let url = "sqlite:sqlite_test.db";
         let mut sqlite = SQLite::connect(url).await.unwrap();
         // let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
         // let _ = sqlite.execute(sql).await.unwrap();
