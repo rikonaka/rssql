@@ -179,7 +179,7 @@ impl SQLite {
     /// ```
     /// use rssql::SQLite;
     /// async fn test_sqlite() {
-    ///     let url = "sqlite:sqlite_test.db";
+    ///     let url = "sqlite:sqlite_test.db?mode=rwc";
     ///     let mut sqlite = SQLite::connect(url).await.unwrap();
     ///     let sql = "SELECT * FROM info";
     ///     let rets = sqlite.execute(sql).await.unwrap();
@@ -376,12 +376,12 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn test_sqlite() {
-        let url = "sqlite:sqlite_test.db";
+        let url = "sqlite:sqlite_test_1.db?mode=rwc";
         let mut sqlite = SQLite::connect(url).await.unwrap();
-        // let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
-        // let _ = sqlite.execute(sql).await.unwrap();
-        // let sql = "INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')";
-        // let _ = sqlite.execute(sql).await.unwrap();
+        let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
+        let _ = sqlite.execute(sql).await.unwrap();
+        let sql = "INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')";
+        let _ = sqlite.execute(sql).await.unwrap();
         let sql = "SELECT * FROM info";
         let rets = sqlite.execute(sql).await.unwrap();
         println!("{}", rets);
