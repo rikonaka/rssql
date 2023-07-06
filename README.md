@@ -4,7 +4,7 @@ Struct-free Rust SQL tool.
 
 ## Intro
 
-[`sqlx`](https://github.com/launchbadge/sqlx) based sql tools, support `mysql (mariadb)` and `postgresql`.
+[`sqlx`](https://github.com/launchbadge/sqlx) based sql tools, support `mysql (mariadb)`, `postgresql` and `sqlite`.
 
 ## Example
 
