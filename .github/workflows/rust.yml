@@ -14,13 +14,40 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 15432:5432
+      mariadb:
+        image: mariadb
+        env:
+          MARIADB_DB: test
+          MARIADB_USER: user
+          MARIADB_PASSWORD: password
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 13306:3306
+
     steps:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
-    - name: Set up docker
-      run: |
-        docker run --name mariadb -p 13306:3306 --network=host -e MARIADB_USER=user -e MARIADB_PASSWORD=password -e MARIADB_DATABASE=test -d mariadb:latest
-        docker run --name postgres -p 15432:5432 --network=host -e POSTGRES_DB=test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -d postgres:latest
     - name: Run tests
       run: cargo test --verbose
+      env:
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 15432
