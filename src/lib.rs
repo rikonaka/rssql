@@ -388,7 +388,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql() {
-        let url = "mysql://user:password@127.0.0.1:13306/test";
+        let url = "mysql://root:password@127.0.0.1:13306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
@@ -412,7 +412,7 @@ mod tests {
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);
-        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name CHAR(30) NOT NULL, date DATE NOT NULL)";
+        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(30) NOT NULL, date DATE NOT NULL)";
         let _ = postgresql.execute(sql).await.unwrap();
         let sql = "INSERT INTO info (id, name, date) VALUES (1, 'test3', '2011-02-02')";
         let _ = postgresql.execute(sql).await.unwrap();
