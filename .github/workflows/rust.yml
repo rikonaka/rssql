@@ -18,5 +18,13 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
+    - name: Set up docker volume
+      run: |
+        docker volume create mariadb_data
+        docker volume create postgresql_data
+    - name: Docker run database
+      run: |
+        docker run --name mariadb -p 13306:3306 -v mariadb_data:/var/lib/mysql -e MARIADB_USER=user -e MARIADB_PASSWORD=password -e MARIADB_DATABASE=test -d mariadb:latest
+        docker run --name postgres -p 15432:5432 -v postgres_data:/var/lib/postgresql/data -e POSTGRES_DB=test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -d postgres:latest
     - name: Run tests
       run: cargo test --verbose

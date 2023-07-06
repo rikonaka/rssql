@@ -388,22 +388,28 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql() {
-        let url = "mysql://user:password@docker:13306/test";
+        let url = "mysql://user:password@localhost:13306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
-        // let rets = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
-        // println!("{}", rets);
+        let sql = "CREATE TABLE IF NOT EXISTS info (name CHAR(30), datetime DATETIME, date DATE)";
+        let _ = mysql.execute(sql).await.unwrap();
+        let sql = "INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')";
+        let _ = mysql.execute(sql).await.unwrap();
         let rets = mysql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
         mysql.close().await;
     }
     #[tokio::test]
     async fn test_mysql_one() {
-        let url = "mysql://user:password@docker:13306/test";
+        let url = "mysql://user:password@localhost:13306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
+        let sql = "CREATE TABLE IF NOT EXISTS info (name CHAR(30), datetime DATETIME, date DATE)";
+        let _ = mysql.execute(sql).await.unwrap();
+        let sql = "INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')";
+        let _ = mysql.execute(sql).await.unwrap();
         let rets = mysql.execute("SELECT * FROM info").await.unwrap();
         for column in &rets.column {
             println!("{}", rets.get_first_one(&column).unwrap());
@@ -415,20 +421,28 @@ mod tests {
     }
     #[tokio::test]
     async fn test_postgresql() {
-        let url = "postgre://user:password@docker:15432/test";
+        let url = "postgre://user:password@localhost:15432/test";
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);
+        let sql = "CREATE TABLE IF NOT EXISTS info (name CHAR(30), datetime DATETIME, date DATE)";
+        let _ = postgresql.execute(sql).await.unwrap();
+        let sql = "INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')";
+        let _ = postgresql.execute(sql).await.unwrap();
         let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
         postgresql.close().await;
     }
     #[tokio::test]
     async fn test_postgresql_one() {
-        let url = "postgre://user:password@docker:15432/test";
+        let url = "postgre://user:password@localhost:15432/test";
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);
+        let sql = "CREATE TABLE IF NOT EXISTS info (name CHAR(30), datetime DATETIME, date DATE)";
+        let _ = postgresql.execute(sql).await.unwrap();
+        let sql = "INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')";
+        let _ = postgresql.execute(sql).await.unwrap();
         let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets.get_first_one("id").unwrap());
         for r in rets.get_all("id").unwrap() {
