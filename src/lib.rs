@@ -4,11 +4,13 @@ use std::collections::HashMap;
 use std::fmt;
 
 use anyhow;
-use sqlx::{Connection, MySqlConnection, PgConnection};
+use sqlx::{Connection, MySqlConnection, PgConnection, SqliteConnection};
 
+mod sqlite;
 mod mysql;
 mod postgresql;
 
+use sqlite::SQLiteDataTypes;
 use mysql::MySQLDataTypes;
 use postgresql::PostgreSQLDataTypes;
 
@@ -20,6 +22,7 @@ pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 pub enum SQLDataTypes {
     MySQLDataTypes(MySQLDataTypes),
     PostgreSQLDataTypes(PostgreSQLDataTypes),
+    SQLiteDataTypes(SQLiteDataTypes)
 }
 
 impl fmt::Display for SQLDataTypes {
@@ -27,6 +30,7 @@ impl fmt::Display for SQLDataTypes {
         match self {
             SQLDataTypes::MySQLDataTypes(m) => write!(f, "{}", m),
             SQLDataTypes::PostgreSQLDataTypes(p) => write!(f, "{}", p),
+            SQLDataTypes::SQLiteDataTypes(s) => write!(f, "{}", s),
         }
     }
 }
@@ -159,6 +163,69 @@ impl fmt::Display for SQLRets {
             write!(f, "{}\n{}", print_str, hline_string)
         } else {
             write!(f, "null")
+        }
+    }
+}
+
+pub struct SQLite {
+    alive: bool,
+    connection: SqliteConnection,
+}
+
+impl SQLite {
+    /// Connect to sqlite database.
+    /// 
+    /// # Example
+    /// ```
+    /// use rssql::SQLite;
+    /// async fn test_sqlite() {
+    ///     let url = "sqlite:data.db";
+    ///     let mut sqlite = SQLite::connect(url).await.unwrap();
+    ///     let sql = "SELECT * FROM info";
+    ///     let rets = sqlite.execute(sql).await.unwrap();
+    ///     println!("{}", rets);
+    /// }
+    /// ```
+    /// # Output
+    /// ```bash
+    /// +-------+-------+-------+
+    /// | name  |  md5  | sha1  |
+    /// +-------+-------+-------+
+    /// | test1 | test1 | test1 |
+    /// | test1 | test1 | test1 |
+    /// +-------+-------+-------+
+    /// ```
+    pub async fn connect(url: &str) -> anyhow::Result<SQLite> {
+        let connection = SqliteConnection::connect(url).await?;
+        let alive = true;
+        Ok(SQLite { connection, alive })
+    }
+    /// Execute the sql.
+    pub async fn execute(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
+        match self.alive {
+            true => sqlite::raw_sqlite_query(&mut self.connection, sql).await,
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
+        }
+    }
+    /// Close the sqlite connnection.
+    pub async fn close(mut self) {
+        self.alive = false;
+        let _ = self.connection.close().await;
+    }
+    /// Check if the connection is valid.
+    pub async fn check_connection(&mut self) -> bool {
+        match self.alive {
+            true => match self.connection.ping().await {
+                Ok(_) => {
+                    self.alive = true;
+                    true
+                },
+                Err(_) => {
+                    self.alive = false;
+                    false
+                },
+            },
+            false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
     }
 }
@@ -307,6 +374,18 @@ impl PostgreSQL {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[tokio::test]
+    async fn test_sqlite() {
+        let url = "sqlite:data.db";
+        let mut sqlite = SQLite::connect(url).await.unwrap();
+        // let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
+        // let _ = sqlite.execute(sql).await.unwrap();
+        // let sql = "INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')";
+        // let _ = sqlite.execute(sql).await.unwrap();
+        let sql = "SELECT * FROM info";
+        let rets = sqlite.execute(sql).await.unwrap();
+        println!("{}", rets);
+    }
     #[tokio::test]
     async fn test_mysql() {
         let url = "mysql://user:password@docker:13306/test";
