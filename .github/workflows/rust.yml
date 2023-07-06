@@ -20,7 +20,7 @@ jobs:
       run: cargo build --verbose
     - name: Set up docker
       run: |
-        docker run --name mariadb -p 13306:3306 --add-host docker:127.0.0.1 -e MARIADB_USER=user -e MARIADB_PASSWORD=password -e MARIADB_DATABASE=test -d mariadb:latest
-        docker run --name postgres -p 15432:5432 --add-host docker:127.0.0.1 -e POSTGRES_DB=test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -d postgres:latest
+        docker run --name mariadb -p 13306:3306 --network=host -e MARIADB_USER=user -e MARIADB_PASSWORD=password -e MARIADB_DATABASE=test -d mariadb:latest
+        docker run --name postgres -p 15432:5432 --network=host -e POSTGRES_DB=test -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -d postgres:latest
     - name: Run tests
       run: cargo test --verbose

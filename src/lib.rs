@@ -63,7 +63,7 @@ impl SQLRets {
     /// ```
     /// use rssql::MySQL;
     /// async fn test_mysql_one() {
-    ///     let url = "mysql://user:password@docker:13306/test";
+    ///     let url = "mysql://user:password@localhost:13306/test";
     ///     let mut mysql = MySQL::connect(url).await.unwrap();
     ///     let check = mysql.check_connection().await;
     ///     println!("{}", check);
@@ -242,7 +242,7 @@ impl MySQL {
     /// ```
     /// use rssql::MySQL;
     /// async fn test_mysql() {
-    ///     let url = "mysql://user:password@docker:13306/test";
+    ///     let url = "mysql://user:password@localhost:13306/test";
     ///     let mut mysql = MySQL::connect(url).await.unwrap();
     ///     let check = mysql.check_connection().await;
     ///     println!("{}", check);
@@ -317,7 +317,7 @@ impl PostgreSQL {
     /// ```
     /// use rssql::PostgreSQL;
     /// async fn test_postgresql() {
-    ///     let url = "postgre://user:password@docker:15432/test";
+    ///     let url = "postgre://user:password@localhost:15432/test";
     ///     let mut postgresql = PostgreSQL::connect(url).await.unwrap();
     ///     let check = postgresql.check_connection().await;
     ///     println!("{}", check);
@@ -388,7 +388,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql() {
-        let url = "mysql://user:password@docker:13306/test";
+        let url = "mysql://user:password@localhost:13306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
@@ -402,7 +402,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql_one() {
-        let url = "mysql://user:password@docker:13306/test";
+        let url = "mysql://user:password@localhost:13306/test";
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
@@ -421,7 +421,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_postgresql() {
-        let url = "postgre://user:password@docker:15432/test";
+        let url = "postgre://user:password@localhost:15432/test";
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);
@@ -435,7 +435,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_postgresql_one() {
-        let url = "postgre://user:password@docker:15432/test";
+        let url = "postgre://user:password@localhost:15432/test";
         let mut postgresql = PostgreSQL::connect(url).await.unwrap();
         let check = postgresql.check_connection().await;
         println!("{}", check);
