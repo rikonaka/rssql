@@ -63,7 +63,7 @@ impl fmt::Display for MySQLDataTypes {
     }
 }
 
-pub async fn raw_process(rows: Vec<MySqlRow>) -> anyhow::Result<SQLRets> {
+pub async fn row_process(rows: Vec<MySqlRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {

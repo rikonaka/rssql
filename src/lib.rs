@@ -209,7 +209,7 @@ impl SQLite {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                sqlite::raw_process(rows).await
+                sqlite::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -220,7 +220,7 @@ impl SQLite {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                sqlite::raw_process(rows).await
+                sqlite::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -303,7 +303,7 @@ impl MySQL {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                mysql::raw_process(rows).await
+                mysql::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -314,7 +314,7 @@ impl MySQL {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                mysql::raw_process(rows).await
+                mysql::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -386,7 +386,7 @@ impl PostgreSQL {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                postgresql::raw_process(rows).await
+                postgresql::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -397,7 +397,7 @@ impl PostgreSQL {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                postgresql::raw_process(rows).await
+                postgresql::row_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
