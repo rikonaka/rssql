@@ -31,13 +31,14 @@ jobs:
       mariadb:
         image: mariadb
         env:
-          MARIADB_DB: test
           MARIADB_ROOT_PASSWORD: password
         ports:
           - 13306:3306
 
     steps:
     - uses: actions/checkout@v3
+    - name: Init database
+      run: mysql -h127.0.0.1 -uroot -ppassword -e "CREATE database test;"
     - name: Build
       run: cargo build --verbose
     - name: Run tests
