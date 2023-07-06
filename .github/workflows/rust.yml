@@ -34,6 +34,7 @@ jobs:
           MARIADB_DB: test
           MARIADB_USER: user
           MARIADB_PASSWORD: password
+          MARIADB_ROOT_PASSWORD: password
         options: >-
           --health-cmd "mysqladmin ping"
           --health-interval 10s
@@ -51,3 +52,5 @@ jobs:
       env:
         POSTGRES_HOST: postgres
         POSTGRES_PORT: 15432
+        MARIADB_HOST: mariadb
+        MARIADB_PORT: 13306
