@@ -392,7 +392,7 @@ mod tests {
         let mut mysql = MySQL::connect(url).await.unwrap();
         let check = mysql.check_connection().await;
         println!("{}", check);
-        let sql = "CREATE TABLE IF NOT EXISTS info (id INT UNSIGNED AUTO_INCREMENT, name VARCHAR(30), date DATE)";
+        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, name VARCHAR(30) NOT NULL, date DATE NOT NULL)";
         let _ = mysql.execute(sql).await.unwrap();
         let sql = "INSERT INTO info (id, name, date) VALUES (1, 'test3', '2011-02-02')";
         let _ = mysql.execute(sql).await.unwrap();
