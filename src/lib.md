@@ -2,7 +2,7 @@ The async struct free SQL toolkit for Rust.
 
 ## Simple example
 
-```
+```rust
 use rssql::PostgreSQL;
 
 async fn test_postgresql() {
@@ -17,7 +17,7 @@ async fn test_postgresql() {
 ```
 
 **Output**
-```
+```bash
 true
 +----+-------+------------+
 | id | name  |    date    |
