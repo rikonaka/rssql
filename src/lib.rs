@@ -458,7 +458,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_mysql() {
-        let mut mysql = MySQL::connect("mysql://root:password@127.0.0.1:3306/test")
+        let mut mysql = MySQL::connect("mysql://user:password@127.0.0.1:3306/test")
             .await
             .unwrap();
         let check = mysql.check_connection().await;
