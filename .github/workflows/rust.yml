@@ -15,6 +15,15 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      mariadb:
+        image: mariadb
+        env:
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
       postgres:
         image: postgres
         env:
@@ -28,15 +37,6 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      mariadb:
-        image: mariadb
-        env:
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: password
-        ports:
-          - 3306:3306
 
     steps:
     - uses: actions/checkout@v3

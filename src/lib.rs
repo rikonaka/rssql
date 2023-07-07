@@ -467,8 +467,8 @@ mod tests {
         let _ = mysql.execute(sql).await.unwrap();
         for i in 0..10 {
             let sql = format!(
-                "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
-                i, i
+                "INSERT INTO info (name, date) VALUES ('test{}', '2023-07-07')",
+                i
             );
             let _ = mysql.execute(&sql).await.unwrap();
         }
@@ -493,8 +493,8 @@ mod tests {
         let _ = postgresql.execute(sql).await.unwrap();
         for i in 0..10 {
             let sql = format!(
-                "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
-                i, i
+                "INSERT INTO info (id, name, date) VALUES ('test{}', '2023-07-07')",
+                i
             );
             let _ = postgresql.execute(&sql).await.unwrap();
         }
