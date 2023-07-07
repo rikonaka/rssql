@@ -61,20 +61,31 @@ impl SQLRets {
     /// Get first data by column name.
     ///
     /// ```
-    /// use rssql::MySQL;
-    /// async fn test_mysql_one() {
-    ///     let url = "mysql://user:password@127.0.0.1:13306/test";
-    ///     let mut mysql = MySQL::connect(url).await.unwrap();
-    ///     let check = mysql.check_connection().await;
-    ///     println!("{}", check);
-    ///     let rets = mysql.execute("SELECT * FROM info").await.unwrap();
-    ///     for c in &rets.column {
-    ///         println!("{}", rets.get_first_one(&c).unwrap());
+    /// use rssql::PostgreSQL;
+    /// async fn get_data() {
+    ///     let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
+    ///         .await
+    ///         .unwrap();
+    ///     let check = postgresql.check_connection().await;
+    ///     assert_eq!(check, true);
+    ///     let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
+    ///     let _ = postgresql.execute(sql).await.unwrap();
+    ///     for i in 0..10 {
+    ///         let sql = format!(
+    ///             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
+    ///             i, i
+    ///         );
+    ///         let _ = postgresql.execute(&sql).await.unwrap();
     ///     }
-    ///     for r in rets.get_all("id").unwrap() {
+    ///     let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+    ///     println!("{}", rets);
+    ///     for column in &rets.column {
+    ///         println!("{}", rets.get_first_one(&column).unwrap());
+    ///     }
+    ///     for r in rets.get_all("name").unwrap() {
     ///         println!("{}", r);
     ///     }
-    ///     mysql.close().await;
+    ///     postgresql.close().await;
     /// }
     /// ```
     pub fn get_first_one(&self, column_name: &str) -> Option<SQLDataTypes> {
@@ -179,10 +190,12 @@ impl SQLite {
     /// ```
     /// use rssql::SQLite;
     /// async fn test_sqlite() {
-    ///     let url = "sqlite:sqlite_test.db?mode=rwc";
-    ///     let mut sqlite = SQLite::connect(url).await.unwrap();
-    ///     let sql = "SELECT * FROM info";
-    ///     let rets = sqlite.execute(sql).await.unwrap();
+    ///     let mut sqlite = SQLite::connect("sqlite:sqlite_test.db?mode=rwc").await.unwrap();
+    ///     let check = sqlite.check_connection().await;
+    ///     assert_eq!(check, true);
+    ///     let _ = sqlite.execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)").await.unwrap();
+    ///     let _ = sqlite.execute("INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')").await.unwrap();
+    ///     let rets = sqlite.execute("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     /// }
     /// ```
@@ -209,7 +222,7 @@ impl SQLite {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                sqlite::row_process(rows).await
+                sqlite::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -220,7 +233,7 @@ impl SQLite {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                sqlite::row_process(rows).await
+                sqlite::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -260,10 +273,9 @@ impl MySQL {
     /// ```
     /// use rssql::MySQL;
     /// async fn test_mysql() {
-    ///     let url = "mysql://user:password@127.0.0.1:13306/test";
-    ///     let mut mysql = MySQL::connect(url).await.unwrap();
+    ///     let mut mysql = MySQL::connect("mysql://user:password@127.0.0.1:3306/test").await.unwrap();
     ///     let check = mysql.check_connection().await;
-    ///     println!("{}", check);
+    ///     assert_eq!(check, true);
     ///     let rets = mysql.execute("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     ///     let rets = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
@@ -274,7 +286,6 @@ impl MySQL {
     /// ```
     /// # Output
     /// ```bash
-    /// true
     /// +----+-------+---------------------+------------+
     /// | id | name  |      datetime       |    date    |
     /// +----+-------+---------------------+------------+
@@ -303,7 +314,7 @@ impl MySQL {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                mysql::row_process(rows).await
+                mysql::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -314,7 +325,7 @@ impl MySQL {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                mysql::row_process(rows).await
+                mysql::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -353,10 +364,9 @@ impl PostgreSQL {
     /// ```
     /// use rssql::PostgreSQL;
     /// async fn test_postgresql() {
-    ///     let url = "postgre://user:password@127.0.0.1:15432/test";
-    ///     let mut postgresql = PostgreSQL::connect(url).await.unwrap();
+    ///     let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test").await.unwrap();
     ///     let check = postgresql.check_connection().await;
-    ///     println!("{}", check);
+    ///     assert_eq!(check, true);
     ///     let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     ///     postgresql.close().await;
@@ -364,7 +374,6 @@ impl PostgreSQL {
     /// ```
     /// # Output
     /// ```bash
-    /// true
     /// +----+-------+------------+
     /// | id | name  |    date    |
     /// +----+-------+------------+
@@ -386,7 +395,7 @@ impl PostgreSQL {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).fetch_all(&mut self.connection).await?;
-                postgresql::row_process(rows).await
+                postgresql::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -397,7 +406,7 @@ impl PostgreSQL {
             true => {
                 let row = sqlx::query(sql).fetch_one(&mut self.connection).await?;
                 let rows = vec![row];
-                postgresql::row_process(rows).await
+                postgresql::rows_process(rows).await
             }
             false => panic!("{}", CLOSED_CONNECTION_ERROR),
         }
@@ -430,26 +439,39 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn test_sqlite() {
-        let url = "sqlite:test.db?mode=rwc";
-        let mut sqlite = SQLite::connect(url).await.unwrap();
-        let sql = "CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)";
-        let _ = sqlite.execute(sql).await.unwrap();
-        let sql = "INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')";
-        let _ = sqlite.execute(sql).await.unwrap();
-        let sql = "SELECT * FROM info";
-        let rets = sqlite.execute(sql).await.unwrap();
+        let mut sqlite = SQLite::connect("sqlite:test.db?mode=rwc").await.unwrap();
+        let check = sqlite.check_connection().await;
+        assert_eq!(check, true);
+        let _ = sqlite
+            .execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)")
+            .await
+            .unwrap();
+        for i in 0..10 {
+            let sql = format!(
+                "INSERT INTO info (name, md5, sha1) VALUES ('test{}', 'md5{}', 'sha1{}')",
+                i, i, i
+            );
+            let _ = sqlite.execute(&sql).await.unwrap();
+        }
+        let rets = sqlite.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
     }
     #[tokio::test]
     async fn test_mysql() {
-        let url = "mysql://root:password@127.0.0.1:3306/test";
-        let mut mysql = MySQL::connect(url).await.unwrap();
+        let mut mysql = MySQL::connect("mysql://root:password@127.0.0.1:3306/test")
+            .await
+            .unwrap();
         let check = mysql.check_connection().await;
-        println!("{}", check);
-        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, name VARCHAR(30) NOT NULL, date DATE NOT NULL)";
+        assert_eq!(check, true);
+        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, name VARCHAR(16), date DATE)";
         let _ = mysql.execute(sql).await.unwrap();
-        let sql = "INSERT INTO info (id, name, date) VALUES (1, 'test3', '2011-02-02')";
-        let _ = mysql.execute(sql).await.unwrap();
+        for i in 0..10 {
+            let sql = format!(
+                "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
+                i, i
+            );
+            let _ = mysql.execute(&sql).await.unwrap();
+        }
         let rets = mysql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
         for column in &rets.column {
@@ -462,16 +484,25 @@ mod tests {
     }
     #[tokio::test]
     async fn test_postgresql() {
-        let url = "postgre://user:password@127.0.0.1:5432/test";
-        let mut postgresql = PostgreSQL::connect(url).await.unwrap();
+        let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
+            .await
+            .unwrap();
         let check = postgresql.check_connection().await;
-        println!("{}", check);
-        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(30) NOT NULL, date DATE NOT NULL)";
+        assert_eq!(check, true);
+        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
         let _ = postgresql.execute(sql).await.unwrap();
-        let sql = "INSERT INTO info (id, name, date) VALUES (1, 'test3', '2011-02-02')";
-        let _ = postgresql.execute(sql).await.unwrap();
+        for i in 0..10 {
+            let sql = format!(
+                "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
+                i, i
+            );
+            let _ = postgresql.execute(&sql).await.unwrap();
+        }
         let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
+        for column in &rets.column {
+            println!("{}", rets.get_first_one(&column).unwrap());
+        }
         for r in rets.get_all("name").unwrap() {
             println!("{}", r);
         }

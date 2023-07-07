@@ -42,7 +42,7 @@ impl fmt::Display for SQLiteDataTypes {
     }
 }
 
-pub async fn row_process(rows: Vec<SqliteRow>) -> anyhow::Result<SQLRets> {
+pub async fn rows_process(rows: Vec<SqliteRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {

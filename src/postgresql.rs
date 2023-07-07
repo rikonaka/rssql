@@ -100,7 +100,7 @@ impl fmt::Display for PostgreSQLDataTypes {
     }
 }
 
-pub async fn row_process(rows: Vec<PgRow>) -> anyhow::Result<SQLRets> {
+pub async fn rows_process(rows: Vec<PgRow>) -> anyhow::Result<SQLRets> {
     let mut sql_rets = SQLRets::new();
 
     if rows.len() > 0 {
