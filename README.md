@@ -2,6 +2,8 @@
 
 Struct-free Rust SQL tool.
 
+[![Rust actions](https://github.com/rikonaka/rssql/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rikonaka/rssql/actions/workflows/rust.yml)
+
 ## Intro
 
 [`sqlx`](https://github.com/launchbadge/sqlx) based sql tools, support `mysql (mariadb)`, `postgresql` and `sqlite`.
