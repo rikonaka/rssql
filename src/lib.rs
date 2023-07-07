@@ -489,7 +489,7 @@ mod tests {
             .unwrap();
         let check = postgresql.check_connection().await;
         assert_eq!(check, true);
-        let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
+        let sql = "CREATE TABLE IF NOT EXISTS info (id SERIAL PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
         let _ = postgresql.execute(sql).await.unwrap();
         for i in 0..10 {
             let sql = format!(
