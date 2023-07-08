@@ -8,7 +8,7 @@ use std::fmt;
 use crate::SQLDataTypes;
 use crate::SQLRets;
 use crate::BINARY;
-use crate::UNKNOWN_DATA_TYPE;
+use crate::UNKNOWN;
 
 #[derive(Debug, Clone)]
 pub enum SQLiteDataTypes {
@@ -101,7 +101,7 @@ pub async fn rows_process(rows: Vec<SqliteRow>) -> anyhow::Result<SQLRets> {
                     let value: NaiveTime = mysql_row.get(i);
                     SQLiteDataTypes::NaiveTime(value)
                 }
-                _ => SQLiteDataTypes::String(UNKNOWN_DATA_TYPE.into()),
+                _ => SQLiteDataTypes::String(UNKNOWN.into()),
             };
             let sql_value = SQLDataTypes::SQLiteDataTypes(sqlite_value);
             sql_row.insert(col_name, sql_value);

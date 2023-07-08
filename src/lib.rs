@@ -14,8 +14,8 @@ use mysql::MySQLDataTypes;
 use postgresql::PostgreSQLDataTypes;
 use sqlite::SQLiteDataTypes;
 
-pub static UNKNOWN_DATA_TYPE: &str = "[UNKNOWN]";
-pub static BINARY: &str = "[BINARY]";
+pub static UNKNOWN: &str = "[unkonwn]";
+pub static BINARY: &str = "[binary]";
 pub static CLOSED_CONNECTION_ERROR: &str = "the connection is closed";
 
 #[derive(Debug, Clone)]

@@ -11,13 +11,13 @@ use std::fmt;
 
 use crate::SQLDataTypes;
 use crate::SQLRets;
-use crate::UNKNOWN_DATA_TYPE;
+use crate::UNKNOWN;
 use crate::BINARY;
 
 
-static PGINTERVAL: &str = "[PGINTERVAL]";
-static PGMONEY: &str = "[PGMONEY]";
-static PGTIMETZ: &str = "[PGTIMETZ]";
+static PGINTERVAL: &str = "[pginterval]";
+static PGMONEY: &str = "[pgmoney]";
+static PGTIMETZ: &str = "[pgtimetz]";
 
 #[derive(Debug, Clone)]
 pub enum PostgreSQLDataTypes {
@@ -251,7 +251,7 @@ pub async fn rows_process(rows: Vec<PgRow>) -> anyhow::Result<SQLRets> {
                     PostgreSQLDataTypes::JsonValue(value)
                 }
                 _ => {
-                    PostgreSQLDataTypes::String(UNKNOWN_DATA_TYPE.into())
+                    PostgreSQLDataTypes::String(UNKNOWN.into())
                 }
             };
             let sql_value = SQLDataTypes::PostgreSQLDataTypes(postgresql_value);

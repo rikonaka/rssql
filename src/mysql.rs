@@ -9,7 +9,7 @@ use std::fmt;
 use crate::SQLDataTypes;
 use crate::SQLRets;
 use crate::BINARY;
-use crate::UNKNOWN_DATA_TYPE;
+use crate::UNKNOWN;
 
 #[derive(Debug, Clone)]
 pub enum MySQLDataTypes {
@@ -166,7 +166,7 @@ pub async fn rows_process(rows: Vec<MySqlRow>) -> anyhow::Result<SQLRets> {
                     let value: JsonValue = mysql_row.get(i);
                     MySQLDataTypes::JsonValue(value)
                 }
-                _ => MySQLDataTypes::String(UNKNOWN_DATA_TYPE.into()),
+                _ => MySQLDataTypes::String(UNKNOWN.into()),
             };
             let sql_value = SQLDataTypes::MySQLDataTypes(mysql_value);
             sql_row.insert(col_name, sql_value);
