@@ -40,11 +40,31 @@ async fn test_postgresql() {
     println!("{}", rets);
     /// Get first one from returns by column name.
     for column in &rets.column {
-        println!("{}", rets.get_first_one(&column).unwrap());
+        let value = rets.get_first_one(&column).unwrap();
+        println!("{}", value);
     }
     /// Get all by column name.
-    for r in rets.get_all("name").unwrap() {
-        println!("{}", r);
+    let values: Vec<SQLDataTypes> = rets.get_all("name").unwrap();
+    for value in values {
+        match value {
+            SQLDataTypes::MySQLDataTypes(m) => (),
+            SQLDataTypes::PostgreSQLDataTypes(p) => (),
+            SQLDataTypes::SQLiteDataTypes(s) => match s {
+                SQLiteDataTypes::Binary(b) => (),
+                SQLiteDataTypes::Bool(b) => (),
+                SQLiteDataTypes::DateTime(d) => (),
+                SQLiteDataTypes::F64(f) => {
+                    let new_f = f + 3.14;
+                    println!("new float value: {}", new_f);
+                }
+                SQLiteDataTypes::I32(i) => (),
+                SQLiteDataTypes::I64(i) => (),
+                SQLiteDataTypes::NaiveDate(n) => (),
+                SQLiteDataTypes::NaiveDateTime(n) => (),
+                SQLiteDataTypes::NaiveTime(n) => (),
+                SQLiteDataTypes::String(s) => (),
+            },
+        }
     }
     /// Close the connection.
     postgresql.close().await;

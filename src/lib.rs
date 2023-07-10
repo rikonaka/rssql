@@ -35,6 +35,8 @@ impl fmt::Display for SQLDataTypes {
     }
 }
 
+impl SQLDataTypes {}
+
 #[derive(Debug)]
 pub struct SQLRets {
     /// Column name vec sort by default.
@@ -439,8 +441,8 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn test_sqlite() {
-        let mut sqlite = SQLite::connect("sqlite:test.db?mode=rwc").await.unwrap();
-        let check = sqlite.check_connection().await;
+        let mut sqlite: SQLite = SQLite::connect("sqlite:test.db?mode=rwc").await.unwrap();
+        let check: bool = sqlite.check_connection().await;
         assert_eq!(check, true);
         let _ = sqlite
             .execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)")
@@ -453,15 +455,16 @@ mod tests {
             );
             let _ = sqlite.execute(&sql).await.unwrap();
         }
-        let rets = sqlite.execute("SELECT * FROM info").await.unwrap();
+        let rets: SQLRets = sqlite.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
     }
     #[tokio::test]
     async fn test_mysql() {
-        let mut mysql = MySQL::connect("mysql://user:password@127.0.0.1:3306/test")
+        // let mut mysql = MySQL::connect("mysql://user:password@docker:13306/test")
+        let mut mysql: MySQL = MySQL::connect("mysql://user:password@127.0.0.1:3306/test")
             .await
             .unwrap();
-        let check = mysql.check_connection().await;
+        let check: bool = mysql.check_connection().await;
         assert_eq!(check, true);
         let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, name VARCHAR(16), date DATE)";
         let _ = mysql.execute(sql).await.unwrap();
@@ -472,22 +475,26 @@ mod tests {
             );
             let _ = mysql.execute(&sql).await.unwrap();
         }
-        let rets = mysql.execute("SELECT * FROM info").await.unwrap();
+        let rets: SQLRets = mysql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
         for column in &rets.column {
-            println!("{}", rets.get_first_one(&column).unwrap());
+            let value: SQLDataTypes = rets.get_first_one(&column).unwrap();
+            println!("{}", value);
         }
-        for r in rets.get_all("name").unwrap() {
-            println!("{}", r);
+        let values: Vec<SQLDataTypes> = rets.get_all("name").unwrap();
+        for value in values {
+            println!("{}", value);
         }
         mysql.close().await;
     }
     #[tokio::test]
     async fn test_postgresql() {
-        let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
-            .await
-            .unwrap();
-        let check = postgresql.check_connection().await;
+        // let mut postgresql = PostgreSQL::connect("postgre://user:password@docker:15432/test")
+        let mut postgresql: PostgreSQL =
+            PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
+                .await
+                .unwrap();
+        let check: bool = postgresql.check_connection().await;
         assert_eq!(check, true);
         let sql = "CREATE TABLE IF NOT EXISTS info (id SERIAL PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
         let _ = postgresql.execute(sql).await.unwrap();
@@ -498,14 +505,34 @@ mod tests {
             );
             let _ = postgresql.execute(&sql).await.unwrap();
         }
-        let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+        let rets: SQLRets = postgresql.execute("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
         for column in &rets.column {
-            println!("{}", rets.get_first_one(&column).unwrap());
+            let value: SQLDataTypes = rets.get_first_one(&column).unwrap();
+            println!("{}", value);
         }
-        for r in rets.get_all("name").unwrap() {
-            println!("{}", r);
-        }
+        let _: Vec<SQLDataTypes> = rets.get_all("name").unwrap();
+        // for value in values {
+        //     match value {
+        //         SQLDataTypes::MySQLDataTypes(m) => (),
+        //         SQLDataTypes::PostgreSQLDataTypes(p) => (),
+        //         SQLDataTypes::SQLiteDataTypes(s) => match s {
+        //             SQLiteDataTypes::Binary(b) => (),
+        //             SQLiteDataTypes::Bool(b) => (),
+        //             SQLiteDataTypes::DateTime(d) => (),
+        //             SQLiteDataTypes::F64(f) => {
+        //                 let new_f = f + 3.14;
+        //                 println!("new float value: {}", new_f);
+        //             }
+        //             SQLiteDataTypes::I32(i) => (),
+        //             SQLiteDataTypes::I64(i) => (),
+        //             SQLiteDataTypes::NaiveDate(n) => (),
+        //             SQLiteDataTypes::NaiveDateTime(n) => (),
+        //             SQLiteDataTypes::NaiveTime(n) => (),
+        //             SQLiteDataTypes::String(s) => (),
+        //         },
+        //     }
+        // }
         postgresql.close().await;
     }
 }
