@@ -69,13 +69,13 @@ impl SQLRets {
     ///     let check = postgresql.check_connection().await;
     ///     assert_eq!(check, true);
     ///     let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
-    ///     let rows_affecteds = postgresql.execute(sql).await.unwrap();
+    ///     let rows_affected = postgresql.execute(sql).await.unwrap();
     ///     for i in 0..10 {
     ///         let sql = format!(
     ///             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
     ///             i, i
     ///         );
-    ///         let rows_affecteds = postgresql.execute(&sql).await.unwrap();
+    ///         let rows_affected = postgresql.execute(&sql).await.unwrap();
     ///     }
     ///     let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
@@ -213,8 +213,8 @@ impl SQLite {
     ///     let mut sqlite = SQLite::connect("sqlite:sqlite_test.db?mode=rwc").await.unwrap();
     ///     let check = sqlite.check_connection().await;
     ///     assert_eq!(check, true);
-    ///     let rows_affecteds = sqlite.execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)").await.unwrap();
-    ///     let rows_affecteds = sqlite.execute("INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')").await.unwrap();
+    ///     let rows_affected = sqlite.execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)").await.unwrap();
+    ///     let rows_affected = sqlite.execute("INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')").await.unwrap();
     ///     let rets = sqlite.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     /// }
@@ -304,7 +304,7 @@ impl MySQL {
     ///     assert_eq!(check, true);
     ///     let rets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
-    ///     let rows_affecteds = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
+    ///     let rows_affected = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
     ///     let rets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     ///     mysql.close().await;
@@ -489,8 +489,8 @@ mod tests {
                 "INSERT INTO info (name, md5, sha1) VALUES ('test{}', 'md5{}', 'sha1{}')",
                 i, i, i
             );
-            let rows_affecteds = sqlite.execute(&sql).await.unwrap();
-            assert_eq!(rows_affecteds, 1);
+            let rows_affected = sqlite.execute(&sql).await.unwrap();
+            assert_eq!(rows_affected, 1);
         }
         let rets: SQLRets = sqlite
             .execute_fetch_all("SELECT * FROM info")
@@ -514,8 +514,8 @@ mod tests {
                 "INSERT INTO info (name, date) VALUES ('test{}', '2023-07-07')",
                 i
             );
-            let rows_affecteds = mysql.execute(&sql).await.unwrap();
-            assert_eq!(rows_affecteds, 1);
+            let rows_affected = mysql.execute(&sql).await.unwrap();
+            assert_eq!(rows_affected, 1);
         }
         let rets: SQLRets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
@@ -546,8 +546,8 @@ mod tests {
                 "INSERT INTO info (name, date) VALUES ('test{}', '2023-07-07')",
                 i
             );
-            let rows_affecteds = postgresql.execute(&sql).await.unwrap();
-            assert_eq!(rows_affecteds, 1);
+            let rows_affected = postgresql.execute(&sql).await.unwrap();
+            assert_eq!(rows_affected, 1);
         }
         let rets: SQLRets = postgresql
             .execute_fetch_all("SELECT * FROM info")

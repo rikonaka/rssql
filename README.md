@@ -63,8 +63,8 @@ async fn test_postgresql() {
             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
             i, i
         );
-        let rows_affecteds = postgresql.execute(&sql).await.unwrap();
-        assert_eq!(rows_affecteds, 1);
+        let rows_affected = postgresql.execute(&sql).await.unwrap();
+        assert_eq!(rows_affected, 1);
     }
 
     /// Select all from table `info`.

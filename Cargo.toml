@@ -1,6 +1,6 @@
 [package]
 name = "rssql"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 license = "MIT"
 description = "Struct free Rust SQL tool."
