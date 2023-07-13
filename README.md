@@ -24,6 +24,7 @@ async fn postgresql_select_example() {
     let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     // let rets = postgresql.execute_fetch_one("SELECT * FROM info").await.unwrap();
     println!("{}", rets);
+    println!("{}", rets.rows_affected().unwrap());
     postgresql.close().await;
 }
 ```
@@ -62,8 +63,8 @@ async fn test_postgresql() {
             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
             i, i
         );
-        let affect_rows = postgresql.execute(&sql).await.unwrap();
-        assert_eq!(affect_rows, 1);
+        let rows_affecteds = postgresql.execute(&sql).await.unwrap();
+        assert_eq!(rows_affecteds, 1);
     }
 
     /// Select all from table `info`.

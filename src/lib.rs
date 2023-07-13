@@ -69,13 +69,13 @@ impl SQLRets {
     ///     let check = postgresql.check_connection().await;
     ///     assert_eq!(check, true);
     ///     let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
-    ///     let affect_rows = postgresql.execute(sql).await.unwrap();
+    ///     let rows_affecteds = postgresql.execute(sql).await.unwrap();
     ///     for i in 0..10 {
     ///         let sql = format!(
     ///             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
     ///             i, i
     ///         );
-    ///         let affect_rows = postgresql.execute(&sql).await.unwrap();
+    ///         let rows_affecteds = postgresql.execute(&sql).await.unwrap();
     ///     }
     ///     let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
@@ -100,6 +100,19 @@ impl SQLRets {
         }
     }
     /// Get all data by column name.
+    ///
+    /// ```
+    /// use rssql::PostgreSQL;
+    /// async fn get_data() {
+    ///     let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
+    ///         .await
+    ///         .unwrap();
+    ///     let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
+    ///     println!("{}", rets);
+    ///     println!("{}", rets.rows_affected().unwrap());
+    ///     postgresql.close().await;
+    /// }
+    /// ```
     pub fn get_all(&self, column_name: &str) -> Option<Vec<SQLDataTypes>> {
         if self.column.contains(&column_name.to_string()) {
             if self.rets.len() > 0 {
@@ -113,6 +126,13 @@ impl SQLRets {
             }
         } else {
             None
+        }
+    }
+    /// Return rows affected.
+    pub fn rows_affected(&self) -> anyhow::Result<u64> {
+        match self.rets.len().try_into() {
+            Ok(r) => Ok(r),
+            Err(e) => Err(e.into()),
         }
     }
 }
@@ -193,8 +213,8 @@ impl SQLite {
     ///     let mut sqlite = SQLite::connect("sqlite:sqlite_test.db?mode=rwc").await.unwrap();
     ///     let check = sqlite.check_connection().await;
     ///     assert_eq!(check, true);
-    ///     let affect_rows = sqlite.execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)").await.unwrap();
-    ///     let affect_rows = sqlite.execute("INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')").await.unwrap();
+    ///     let rows_affecteds = sqlite.execute("CREATE TABLE IF NOT EXISTS info (name TEXT, md5 TEXT, sha1 TEXT)").await.unwrap();
+    ///     let rows_affecteds = sqlite.execute("INSERT INTO info (name, md5, sha1) VALUES ('test1', 'test1', 'test1')").await.unwrap();
     ///     let rets = sqlite.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     /// }
@@ -213,7 +233,7 @@ impl SQLite {
         let alive = true;
         Ok(SQLite { connection, alive })
     }
-    /// Execute the sql and fetch all.
+    /// Execute the sql but do not get data from database, returns the rows affected.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<u64> {
         match self.alive {
             true => {
@@ -223,7 +243,7 @@ impl SQLite {
             false => panic!("{}", CONNECTION_CLOSED_ERROR),
         }
     }
-    /// Same as execute.
+    /// Execute and fetch all.
     pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => {
@@ -284,7 +304,7 @@ impl MySQL {
     ///     assert_eq!(check, true);
     ///     let rets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
-    ///     let affect_rows = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
+    ///     let rows_affecteds = mysql.execute("INSERT INTO info (name, datetime, date) VALUES ('test3', '2011-01-01', '2011-02-02')").await.unwrap();
     ///     let rets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     ///     println!("{}", rets);
     ///     mysql.close().await;
@@ -311,7 +331,7 @@ impl MySQL {
         let alive = true;
         Ok(MySQL { connection, alive })
     }
-    /// Execute the sql and fetch all.
+    /// Execute the sql but do not get data from database, returns the rows affected.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<u64> {
         match self.alive {
             true => {
@@ -321,7 +341,7 @@ impl MySQL {
             false => panic!("{}", CONNECTION_CLOSED_ERROR),
         }
     }
-    /// Same as execute.
+    /// Execute the sql and fetch all.
     pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => {
@@ -398,18 +418,17 @@ impl PostgreSQL {
         let alive = true;
         Ok(PostgreSQL { connection, alive })
     }
-    /// Execute the sql and fetch all.
+    /// Execute the sql but do not get data from database, returns the rows affected.
     pub async fn execute(&mut self, sql: &str) -> anyhow::Result<u64> {
         match self.alive {
             true => {
                 let rows = sqlx::query(sql).execute(&mut self.connection).await?;
-                println!("{}", rows.rows_affected());
                 Ok(rows.rows_affected())
             }
             false => panic!("{}", CONNECTION_CLOSED_ERROR),
         }
     }
-    /// Same as execute.
+    /// Execute the sql and fetch all.
     pub async fn execute_fetch_all(&mut self, sql: &str) -> anyhow::Result<SQLRets> {
         match self.alive {
             true => {
@@ -470,14 +489,15 @@ mod tests {
                 "INSERT INTO info (name, md5, sha1) VALUES ('test{}', 'md5{}', 'sha1{}')",
                 i, i, i
             );
-            let affect_rows = sqlite.execute(&sql).await.unwrap();
-            assert_eq!(affect_rows, 1);
+            let rows_affecteds = sqlite.execute(&sql).await.unwrap();
+            assert_eq!(rows_affecteds, 1);
         }
         let rets: SQLRets = sqlite
             .execute_fetch_all("SELECT * FROM info")
             .await
             .unwrap();
         println!("{}", rets);
+        println!("{}", rets.rows_affected().unwrap());
     }
     #[tokio::test]
     async fn test_mysql() {
@@ -494,11 +514,12 @@ mod tests {
                 "INSERT INTO info (name, date) VALUES ('test{}', '2023-07-07')",
                 i
             );
-            let affect_rows = mysql.execute(&sql).await.unwrap();
-            assert_eq!(affect_rows, 1);
+            let rows_affecteds = mysql.execute(&sql).await.unwrap();
+            assert_eq!(rows_affecteds, 1);
         }
         let rets: SQLRets = mysql.execute_fetch_all("SELECT * FROM info").await.unwrap();
         println!("{}", rets);
+        println!("{}", rets.rows_affected().unwrap());
         for column in &rets.column {
             let value: SQLDataTypes = rets.get_first_one(&column).unwrap();
             println!("{}", value);
@@ -525,14 +546,15 @@ mod tests {
                 "INSERT INTO info (name, date) VALUES ('test{}', '2023-07-07')",
                 i
             );
-            let affect_rows = postgresql.execute(&sql).await.unwrap();
-            assert_eq!(affect_rows, 1);
+            let rows_affecteds = postgresql.execute(&sql).await.unwrap();
+            assert_eq!(rows_affecteds, 1);
         }
         let rets: SQLRets = postgresql
             .execute_fetch_all("SELECT * FROM info")
             .await
             .unwrap();
         println!("{}", rets);
+        println!("{}", rets.rows_affected().unwrap());
         for column in &rets.column {
             let value: SQLDataTypes = rets.get_first_one(&column).unwrap();
             println!("{}", value);
