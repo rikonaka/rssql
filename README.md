@@ -15,6 +15,35 @@ Struct-free Rust SQL tool.
 ```rust
 use rssql::PostgreSQL;
 
+async fn postgresql_select_example() {
+    let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
+        .await
+        .unwrap();
+    let check = postgresql.check_connection().await;
+    assert_eq!(check, true);
+    let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
+    // let rets = postgresql.execute_fetch_one("SELECT * FROM info").await.unwrap();
+    println!("{}", rets);
+    postgresql.close().await;
+}
+```
+
+**Output**
+
+```bash
++----+-------+------------+
+| id | name  |    date    |
++----+-------+------------+
+| 1  | test1 | 2023-06-11 |
+| 2  | test2 | 2023-06-11 |
++----+-------+------------+
+```
+
+### More
+
+```rust
+use rssql::PostgreSQL;
+
 async fn test_postgresql() {
     /// Connect to database.
     let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
@@ -23,8 +52,10 @@ async fn test_postgresql() {
     /// Check connection.
     let check = postgresql.check_connection().await;
     assert_eq!(check, true);
+
     let sql = "CREATE TABLE IF NOT EXISTS info (id INT PRIMARY KEY NOT NULL, name VARCHAR(16), date DATE)";
     let _ = postgresql.execute(sql).await.unwrap();
+
     /// Insert 10 rows data into table `info`.
     for i in 0..10 {
         let sql = format!(
@@ -34,17 +65,20 @@ async fn test_postgresql() {
         let affect_rows = postgresql.execute(&sql).await.unwrap();
         assert_eq!(affect_rows, 1);
     }
+
     /// Select all from table `info`.
     let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     // let rets = postgresql.execute_fetch_one("SELECT * FROM info").await.unwrap();
     println!("{}", rets);
+
     /// Get first one from returns by column name.
     for column in &rets.column {
         let value = rets.get_first_one(&column).unwrap();
         println!("{}", value);
     }
+
     /// Get all by column name.
-    let values: Vec<SQLDataTypes> = rets.get_all("name").unwrap();
+    let values = rets.get_all("name").unwrap();
     for value in values {
         match value {
             SQLDataTypes::MySQLDataTypes(m) => (),
@@ -66,35 +100,8 @@ async fn test_postgresql() {
             },
         }
     }
+
     /// Close the connection.
     postgresql.close().await;
 }
-```
-
-### Show the result
-
-```rust
-use rssql::PostgreSQL;
-
-async fn postgresql_select() {
-    let mut postgresql = PostgreSQL::connect("postgre://user:password@127.0.0.1:5432/test")
-        .await
-        .unwrap();
-    let check = postgresql.check_connection().await;
-    assert_eq!(check, true);
-    let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
-    println!("{}", rets);
-    postgresql.close().await;
-}
-```
-
-**Output**
-
-```bash
-+----+-------+------------+
-| id | name  |    date    |
-+----+-------+------------+
-| 1  | test1 | 2023-06-11 |
-| 2  | test2 | 2023-06-11 |
-+----+-------+------------+
 ```
