@@ -42,7 +42,7 @@ pub struct SQLRets {
     /// Column name vec sort by default.
     pub column: Vec<String>,
     /// Returns.
-    pub rets: Vec<HashMap<String, SQLDataTypes>>,
+    rets: Vec<HashMap<String, SQLDataTypes>>,
 }
 
 impl SQLRets {
