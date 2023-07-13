@@ -31,11 +31,11 @@ async fn test_postgresql() {
             "INSERT INTO info (id, name, date) VALUES ({}, 'test{}', '2023-07-07')",
             i, i
         );
-        let _ = postgresql.execute(&sql).await.unwrap();
+        let affect_rows = postgresql.execute(&sql).await.unwrap();
+        assert_eq!(affect_rows, 1);
     }
     /// Select all from table `info`.
-    let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
-    // let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
+    let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     // let rets = postgresql.execute_fetch_one("SELECT * FROM info").await.unwrap();
     println!("{}", rets);
     /// Get first one from returns by column name.
@@ -82,7 +82,7 @@ async fn postgresql_select() {
         .unwrap();
     let check = postgresql.check_connection().await;
     assert_eq!(check, true);
-    let rets = postgresql.execute("SELECT * FROM info").await.unwrap();
+    let rets = postgresql.execute_fetch_all("SELECT * FROM info").await.unwrap();
     println!("{}", rets);
     postgresql.close().await;
 }
