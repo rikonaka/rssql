@@ -583,22 +583,22 @@ mod tests {
         // }
         postgresql.close().await;
     }
-    #[tokio::test]
-    async fn test_all() {
-        use sqlx::postgres::PgPoolOptions;
-        let pool = PgPoolOptions::new()
-            .max_connections(5)
-            .connect("postgres://user:password@127.0.0.1:5432/test")
-            .await
-            .unwrap();
+    // #[tokio::test]
+    // async fn test_all() {
+    //     use sqlx::postgres::PgPoolOptions;
+    //     let pool = PgPoolOptions::new()
+    //         .max_connections(5)
+    //         .connect("postgres://user:password@127.0.0.1:5432/test")
+    //         .await
+    //         .unwrap();
 
-        // Make a simple query to return the given parameter (use a question mark `?` instead of `$1` for MySQL)
-        let row: (i32,) = sqlx::query_as("SELECT id FROM info WHERE id=1")
-            .fetch_one(&pool)
-            .await
-            .unwrap();
+    //     // Make a simple query to return the given parameter (use a question mark `?` instead of `$1` for MySQL)
+    //     let row: (i32,) = sqlx::query_as("SELECT id FROM info WHERE id=1")
+    //         .fetch_one(&pool)
+    //         .await
+    //         .unwrap();
 
-        // println!(">>>> {}", row.0);
-        assert_eq!(row.0, 1);
-    }
+    //     // println!(">>>> {}", row.0);
+    //     assert_eq!(row.0, 1);
+    // }
 }
