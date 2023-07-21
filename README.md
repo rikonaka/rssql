@@ -38,6 +38,7 @@ async fn postgresql_select_example() {
 | 1  | test1 | 2023-06-11 |
 | 2  | test2 | 2023-06-11 |
 +----+-------+------------+
+2
 ```
 
 ### More
