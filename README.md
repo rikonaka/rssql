@@ -1,6 +1,6 @@
 # rssql
 
-Struct-free Rust SQL tool.
+Struct-agnostic Rust SQL tool.
 
 [![Rust actions](https://github.com/rikonaka/rssql/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rikonaka/rssql/actions/workflows/rust.yml)
 
